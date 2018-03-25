@@ -61,7 +61,7 @@ public class MyLinkedList<T> implements ListInterface<T> {
 }
 
 class MyLinkedListIterator<T> implements Iterator<T> {
-    // FIXME implement this
+    // FIXME: implement this
     // Implement the iterator for MyLinkedList.
     // You have to maintain the current position of the iterator.
     private MyLinkedList<T> list;

@@ -8,8 +8,10 @@ public class MovieDBItem implements Comparable<MovieDBItem> {
     private final String title;
 
     public MovieDBItem(String genre, String title) {
-        if (genre == null) throw new NullPointerException("genre");
-        if (title == null) throw new NullPointerException("title");
+        if (genre == null)
+            throw new NullPointerException("genre");
+        if (title == null)
+            throw new NullPointerException("title");
 
         this.genre = genre;
         this.title = title;
@@ -25,7 +27,7 @@ public class MovieDBItem implements Comparable<MovieDBItem> {
 
     @Override
     public int compareTo(MovieDBItem other) {
-        // TODO delete the line below and implement this method
+        // TODO: delete the line below and implement this method
         throw new UnsupportedOperationException();
     }
 

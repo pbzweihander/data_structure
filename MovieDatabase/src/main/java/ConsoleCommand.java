@@ -65,8 +65,7 @@ class DeleteCmd extends AbstractConsoleCommand {
 
     public void parseArguments(String[] args) throws CommandParseException {
         if (args.length != 3)
-            throw new CommandParseException(
-                    "DELETE", Arrays.toString(args), "insufficient argument");
+            throw new CommandParseException("DELETE", Arrays.toString(args), "insufficient argument");
         this.genre = args[1];
         this.movie = args[2];
     }
@@ -94,8 +93,7 @@ class InsertCmd extends AbstractConsoleCommand {
     @Override
     protected void parseArguments(String[] args) throws CommandParseException {
         if (args.length != 3)
-            throw new CommandParseException(
-                    "INSERT", Arrays.toString(args), "insufficient argument");
+            throw new CommandParseException("INSERT", Arrays.toString(args), "insufficient argument");
         this.genre = args[1];
         this.movie = args[2];
     }
@@ -114,8 +112,7 @@ class PrintCmd extends AbstractConsoleCommand {
     @Override
     protected void parseArguments(String[] args) throws CommandParseException {
         if (args.length != 1)
-            throw new CommandParseException(
-                    "PRINT", Arrays.toString(args), "unnecessary argument(s)");
+            throw new CommandParseException("PRINT", Arrays.toString(args), "unnecessary argument(s)");
     }
 
     @Override
@@ -143,8 +140,7 @@ class SearchCmd extends AbstractConsoleCommand {
     @Override
     protected void parseArguments(String[] args) throws CommandParseException {
         if (args.length != 2)
-            throw new CommandParseException(
-                    "SEARCH", Arrays.toString(args), "insufficient argument");
+            throw new CommandParseException("SEARCH", Arrays.toString(args), "insufficient argument");
         this.term = args[1];
     }
 
