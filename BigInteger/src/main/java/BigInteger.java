@@ -40,7 +40,7 @@ public class BigInteger {
         }
 
         public void trim(int toBeTrimed) {
-            while (innerArr[size - 1] == toBeTrimed)
+            while (innerArr[size - 1] == toBeTrimed && size > 1)
                 size--;
         }
 
@@ -59,7 +59,6 @@ public class BigInteger {
     private Vector innerVector;
     private boolean isPlus = true;
 
-    // implement this
     public static final Pattern EXPRESSION_PATTERN = Pattern
             .compile("^\\s*([+-]?)\\s*(\\d+)\\s*([+\\-*])\\s*([+-]?)\\s*(\\d+)\\s*$");
 
@@ -207,10 +206,16 @@ public class BigInteger {
 
     @Override
     public String toString() {
-        return (isPlus ? "" : "-") + IntStream.of(innerVector.innerArr).mapToObj(i -> ("0000" + i))
+        return IntStream.of(innerVector.innerArr).mapToObj(i -> ("0000" + i))
                 .map(s -> s.substring(s.length() - 4, s.length())).reduce((a, b) -> b + a).map(s -> s.chars()
                         .dropWhile(c -> c == '0').mapToObj(c -> "" + (char) c).reduce((a, b) -> a + b).orElse("0"))
-                .orElse("0");
+                .map(s -> {
+                    if (isPlus || s.equals("0")) {
+                        return s;
+                    } else {
+                        return "-" + s;
+                    }
+                }).orElse("0");
     }
 
     public static int compareToUnsigned(BigInteger a, BigInteger b) {
