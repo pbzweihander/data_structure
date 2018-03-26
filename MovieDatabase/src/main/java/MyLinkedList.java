@@ -1,8 +1,11 @@
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
-public class MyLinkedList<T> implements ListInterface<T> {
+public class MyLinkedList<T extends Comparable<T>> implements ListInterface<T> {
     // dummy head
     Node<T> head;
     int numItems;
@@ -36,7 +39,10 @@ public class MyLinkedList<T> implements ListInterface<T> {
 
     @Override
     public int size() {
-        return numItems;
+        int i = 0;
+        for (Node<T> node = head; node.getNext() != null; node = node.getNext())
+            i++;
+        return i;
     }
 
     @Override
@@ -44,24 +50,46 @@ public class MyLinkedList<T> implements ListInterface<T> {
         return head.getNext().getItem();
     }
 
+    /**
+     * Add a item to the list. This method assures sorted and distinct list.
+     */
     @Override
     public void add(T item) {
-        Node<T> last = head;
-        while (last.getNext() != null) {
-            last = last.getNext();
+        Node<T> curr = head;
+        while (curr.getNext() != null && curr.getNext().getItem().compareTo(item) < 0) {
+            if (curr.getNext().getItem().compareTo(item) == 0)
+                return;
+            curr = curr.getNext();
         }
-        last.insertNext(item);
-        numItems += 1;
+        curr.insertNext(item);
     }
 
     @Override
     public void removeAll() {
         head.setNext(null);
     }
+
+    /**
+     * Make stream of this list
+     *
+     * @see MovieDB#search(String)
+     * @return stream of this list
+     */
+    public Stream<T> stream() {
+        return StreamSupport.stream(Spliterators.spliterator(iterator(), size(), 0), false);
+    }
+
+    /**
+     * Add all items of other list. Use this method for collection.
+     *
+     * @see MovieDB#search(String)
+     */
+    public void addAll(MyLinkedList<T> other) {
+        other.forEach(item -> add(item));
+    }
 }
 
-class MyLinkedListIterator<T> implements Iterator<T> {
-    // FIXME: implement this
+class MyLinkedListIterator<T extends Comparable<T>> implements Iterator<T> {
     // Implement the iterator for MyLinkedList.
     // You have to maintain the current position of the iterator.
     private MyLinkedList<T> list;

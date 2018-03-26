@@ -29,12 +29,12 @@ public class Node<T> {
     }
 
     public final void insertNext(T obj) {
-        // FIXME:
-        throw new UnsupportedOperationException("not implemented yet");
+        Node<T> tmp = next;
+        next = new Node<T>(obj);
+        next.next = tmp;
     }
 
     public final void removeNext() {
-        // FIXME:
-        throw new UnsupportedOperationException("not implemented yet");
+        next = next.next;
     }
 }
