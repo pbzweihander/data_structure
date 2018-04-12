@@ -61,6 +61,8 @@ public class MyLinkedList<T extends Comparable<T>> implements ListInterface<T> {
                 return;
             curr = curr.getNext();
         }
+        if (curr.getNext() != null && curr.getNext().getItem().compareTo(item) == 0)
+            return;
         curr.insertNext(item);
     }
 
