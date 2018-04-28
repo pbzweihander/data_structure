@@ -1,6 +1,8 @@
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Stack;
+import java.util.stream.Collectors;
 
 public class CalculatorTest {
     public enum OpType {
@@ -8,7 +10,7 @@ public class CalculatorTest {
     };
 
     private enum TokenType {
-        Number, Operator, Bracket, None,
+        Number, Operator, OpeningBracket, ClosingBracket, None,
     }
 
     private abstract class Token {
@@ -103,8 +105,12 @@ public class CalculatorTest {
             case Multiply:
                 return a.number * b.number;
             case Divide:
+                if (b.number == 0)
+                    throw new IllegalArgumentException();
                 return a.number / b.number;
             case Modular:
+                if (b.number == 0)
+                    throw new IllegalArgumentException();
                 return a.number % b.number;
             case Exponent:
                 return (long) Math.pow(a.number, b.number);
@@ -123,18 +129,18 @@ public class CalculatorTest {
         public void applyWithStack(Stack<Token> stack) {
             if (stack.isEmpty())
                 throw new IllegalArgumentException();
-            Token a = stack.pop();
-            if (a.getType() != TokenType.Number)
+            Token b = stack.pop();
+            if (b.getType() != TokenType.Number)
                 throw new IllegalArgumentException();
 
             long result;
             if (operator == OpType.UnaryMinus)
-                result = apply(a.asNumber());
+                result = apply(b.asNumber());
             else {
                 if (stack.isEmpty())
                     throw new IllegalArgumentException();
-                Token b = stack.pop();
-                if (b.getType() != TokenType.Number)
+                Token a = stack.pop();
+                if (a.getType() != TokenType.Number)
                     throw new IllegalArgumentException();
                 result = apply(a.asNumber(), b.asNumber());
             }
@@ -154,7 +160,7 @@ public class CalculatorTest {
 
         @Override
         public TokenType getType() {
-            return TokenType.Bracket;
+            return TokenType.OpeningBracket;
         }
     }
 
@@ -210,10 +216,12 @@ public class CalculatorTest {
         try {
             Token[] tokens = infixToPostfix(input);
             long result = evaluateInfix(tokens);
+            System.out.print(Arrays.stream(tokens).map(t -> t.toString()).collect(Collectors.joining(" ")));
+            System.out.println();
             System.out.println(result);
         } catch (IllegalArgumentException e) {
             System.out.println("ERROR");
-            e.printStackTrace();
+            // e.printStackTrace(System.err);
         }
     }
 
@@ -221,6 +229,12 @@ public class CalculatorTest {
         Stack<Token> stack = new Stack<>();
 
         for (Token t : tokens) {
+            // System.out.println("token - " + t);
+            // System.out.print("stack - ");
+            // for (Token tt : stack)
+            //     System.out.print(tt + " ");
+            // System.out.println();
+
             if (t.getType() == TokenType.Operator)
                 t.asOperator().applyWithStack(stack);
             else if (t.getType() == TokenType.Number)
@@ -246,7 +260,20 @@ public class CalculatorTest {
         boolean whitespace_after_acc = false;
         TokenType last = TokenType.None;
 
+        // int i = 0;
         for (char c : expr.toCharArray()) {
+            // System.out.println("remain - " + expr.substring(i++));
+            // System.out.println("char - " + c);
+            // System.out.print("stack - ");
+            // for (Token t : stack)
+            //     System.out.print(t + " ");
+            // System.out.println();
+            // System.out.print("result - ");
+            // for (Token t : result)
+            //     System.out.print(t + " ");
+            // System.out.println();
+            // System.out.println("acc - " + acc);
+
             if (Character.isDigit(c)) {
                 if (whitespace_after_acc)
                     throw new IllegalArgumentException();
@@ -266,12 +293,12 @@ public class CalculatorTest {
                     if (c == '(') {
                         stack.push(new TokenBracket());
 
-                        last = TokenType.Bracket;
+                        last = TokenType.OpeningBracket;
                     } else if (c == ')') {
-                        if (stack.peek().getType() == TokenType.Bracket)
+                        if (last == TokenType.OpeningBracket)
                             throw new IllegalArgumentException();
 
-                        while (!stack.isEmpty() && stack.peek().getType() != TokenType.Bracket)
+                        while (!stack.isEmpty() && stack.peek().getType() != TokenType.OpeningBracket)
                             result.add(stack.pop());
 
                         if (stack.isEmpty())
@@ -279,9 +306,9 @@ public class CalculatorTest {
                         else
                             stack.pop();
 
-                        last = TokenType.Bracket;
+                        last = TokenType.ClosingBracket;
                     } else {
-                        if ((last == TokenType.None || last == TokenType.Operator) && c == '-')
+                        if (last != TokenType.Number && last != TokenType.ClosingBracket && c == '-')
                             c = '~';
                         TokenOperator op = new TokenOperator(c);
                         if (op.getOperator() == OpType.None)
