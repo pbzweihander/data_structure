@@ -28,6 +28,7 @@ public class Kipa {
                 pb.redirectInput(in);
                 pb.redirectErrorStream(true);
                 pb.redirectOutput(new File("y.out"));
+                pb.redirectError(new File("e.out"));
                 Process p = pb.start();
                 long st = System.nanoTime(), ed;
                 while ((ed = System.nanoTime()) - st < limit) {
@@ -45,9 +46,12 @@ public class Kipa {
                 BufferedReader br = new BufferedReader(new FileReader(new File("y.out")));
                 BufferedReader br2 = new BufferedReader(new FileReader(out));
                 String s, s2;
+                int line_number = 1;
                 while ((s = br.readLine()) != null) {
                     s2 = br2.readLine();
-                    assert s.equals(s2) : "Wrong answer on test " + i;
+                    assert s.equals(s2) : "Wrong answer on test " + i + " - " + line_number + "\nexpected: " + s2
+                            + "\nactual: " + s;
+                    line_number++;
                 }
                 br.close();
                 br2.close();
