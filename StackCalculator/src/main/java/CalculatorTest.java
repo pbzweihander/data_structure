@@ -36,7 +36,7 @@ public class CalculatorTest {
         private long number;
 
         public TokenNumber(String s) {
-            number = Integer.parseInt(s);
+            number = Long.parseLong(s);
             origin = s.charAt(s.length() - 1);
         }
 
@@ -221,7 +221,6 @@ public class CalculatorTest {
             System.out.println(result);
         } catch (IllegalArgumentException e) {
             System.out.println("ERROR");
-            // e.printStackTrace(System.err);
         }
     }
 
@@ -229,12 +228,6 @@ public class CalculatorTest {
         Stack<Token> stack = new Stack<>();
 
         for (Token t : tokens) {
-            // System.out.println("token - " + t);
-            // System.out.print("stack - ");
-            // for (Token tt : stack)
-            //     System.out.print(tt + " ");
-            // System.out.println();
-
             if (t.getType() == TokenType.Operator)
                 t.asOperator().applyWithStack(stack);
             else if (t.getType() == TokenType.Number)
@@ -255,47 +248,34 @@ public class CalculatorTest {
         Stack<Token> stack = new Stack<>();
         ArrayList<Token> result = new ArrayList<>();
 
-        StringBuilder acc = new StringBuilder();
-        boolean acc_is_empty = true;
-        boolean whitespace_after_acc = false;
-        TokenType last = TokenType.None;
+        StringBuilder number_acc = new StringBuilder();
+        boolean is_acc_empty = true;
+        boolean is_whitespace_after_acc = false;
+        TokenType last_token = TokenType.None;
 
-        // int i = 0;
         for (char c : expr.toCharArray()) {
-            // System.out.println("remain - " + expr.substring(i++));
-            // System.out.println("char - " + c);
-            // System.out.print("stack - ");
-            // for (Token t : stack)
-            //     System.out.print(t + " ");
-            // System.out.println();
-            // System.out.print("result - ");
-            // for (Token t : result)
-            //     System.out.print(t + " ");
-            // System.out.println();
-            // System.out.println("acc - " + acc);
-
             if (Character.isDigit(c)) {
-                if (whitespace_after_acc)
+                if (is_whitespace_after_acc)
                     throw new IllegalArgumentException();
 
-                acc.append(c);
-                acc_is_empty = false;
+                number_acc.append(c);
+                is_acc_empty = false;
 
-                last = TokenType.Number;
+                last_token = TokenType.Number;
             } else {
-                if (!acc_is_empty) {
-                    result.add(new TokenNumber(acc.toString()));
-                    acc.setLength(0);
-                    acc_is_empty = true;
-                }
-
                 if (!Character.isWhitespace(c)) {
+                    if (!is_acc_empty) {
+                        result.add(new TokenNumber(number_acc.toString()));
+                        number_acc.setLength(0);
+                        is_acc_empty = true;
+                    }
+
                     if (c == '(') {
                         stack.push(new TokenBracket());
 
-                        last = TokenType.OpeningBracket;
+                        last_token = TokenType.OpeningBracket;
                     } else if (c == ')') {
-                        if (last == TokenType.OpeningBracket)
+                        if (last_token == TokenType.OpeningBracket)
                             throw new IllegalArgumentException();
 
                         while (!stack.isEmpty() && stack.peek().getType() != TokenType.OpeningBracket)
@@ -306,9 +286,9 @@ public class CalculatorTest {
                         else
                             stack.pop();
 
-                        last = TokenType.ClosingBracket;
+                        last_token = TokenType.ClosingBracket;
                     } else {
-                        if (last != TokenType.Number && last != TokenType.ClosingBracket && c == '-')
+                        if (last_token != TokenType.Number && last_token != TokenType.ClosingBracket && c == '-')
                             c = '~';
                         TokenOperator op = new TokenOperator(c);
                         if (op.getOperator() == OpType.None)
@@ -317,19 +297,19 @@ public class CalculatorTest {
                             result.add(stack.pop());
                         stack.push(op);
 
-                        last = TokenType.Operator;
+                        last_token = TokenType.Operator;
                     }
 
-                    whitespace_after_acc = false;
+                    is_whitespace_after_acc = false;
                 } else {
-                    if (!acc_is_empty)
-                        whitespace_after_acc = true;
+                    if (!is_acc_empty)
+                        is_whitespace_after_acc = true;
                 }
             }
         }
 
-        if (!acc_is_empty)
-            result.add(new TokenNumber(acc.toString()));
+        if (!is_acc_empty)
+            result.add(new TokenNumber(number_acc.toString()));
         while (!stack.isEmpty())
             result.add(stack.pop());
 
