@@ -5,7 +5,7 @@ import java.util.Stack;
 import java.util.stream.Collectors;
 
 public class CalculatorTest {
-    public enum OpType {
+    private enum OpType {
         Plus, Minus, Multiply, Divide, Modular, Exponent, UnaryMinus, None;
     };
 
@@ -106,16 +106,16 @@ public class CalculatorTest {
                 return a.number * b.number;
             case Divide:
                 if (b.number == 0)
-                    throw new IllegalArgumentException();
+                    throw new IllegalArgumentException("Arithmetic error: cannot divide with 0");
                 return a.number / b.number;
             case Modular:
                 if (b.number == 0)
-                    throw new IllegalArgumentException();
+                    throw new IllegalArgumentException("Arithmetic error: cannot divide with 0");
                 return a.number % b.number;
             case Exponent:
                 return (long) Math.pow(a.number, b.number);
             default:
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException("Illegal operator");
             }
         }
 
@@ -126,25 +126,8 @@ public class CalculatorTest {
                 throw new IllegalArgumentException();
         }
 
-        public void applyWithStack(Stack<Token> stack) {
-            if (stack.isEmpty())
-                throw new IllegalArgumentException();
-            Token b = stack.pop();
-            if (b.getType() != TokenType.Number)
-                throw new IllegalArgumentException();
-
-            long result;
-            if (operator == OpType.UnaryMinus)
-                result = apply(b.asNumber());
-            else {
-                if (stack.isEmpty())
-                    throw new IllegalArgumentException();
-                Token a = stack.pop();
-                if (a.getType() != TokenType.Number)
-                    throw new IllegalArgumentException();
-                result = apply(a.asNumber(), b.asNumber());
-            }
-            stack.push(new TokenNumber(result));
+        public boolean isUnaryOperator() {
+            return operator == OpType.UnaryMinus;
         }
 
         @Override
@@ -195,6 +178,185 @@ public class CalculatorTest {
         }
     }
 
+    private class Parser {
+        private String expr;
+        private Stack<Token> stack;
+        private ArrayList<Token> result;
+        private StringBuilder number_acc;
+        private boolean is_acc_empty;
+        private boolean is_whitespace_after_acc;
+        private TokenType last_token;
+
+        public Parser(String expr) {
+            this.expr = expr;
+            stack = new Stack<>();
+            result = new ArrayList<>();
+            number_acc = new StringBuilder();
+            is_acc_empty = true;
+            is_whitespace_after_acc = false;
+            last_token = TokenType.None;
+        }
+
+        private void accumulateNumber(char c) {
+            if (is_whitespace_after_acc)
+                throw new IllegalArgumentException("Whitespace between number");
+
+            number_acc.append(c);
+            is_acc_empty = false;
+
+            last_token = TokenType.Number;
+        }
+
+        private void pushAccToStackAsNumber() {
+            result.add(new TokenNumber(number_acc.toString()));
+            number_acc.setLength(0);
+            is_acc_empty = true;
+        }
+
+        private void pushOpeningBracketToStack() {
+            stack.push(new TokenBracket());
+
+            last_token = TokenType.OpeningBracket;
+        }
+
+        private void popUntilOpeningBracket() {
+            if (last_token == TokenType.OpeningBracket)
+                throw new IllegalArgumentException("Empty parenthesis");
+
+            while (!stack.isEmpty() && stack.peek().getType() != TokenType.OpeningBracket)
+                result.add(stack.pop());
+
+            if (stack.isEmpty())
+                throw new IllegalArgumentException("Mismatched parenthesis");
+            else
+                stack.pop();
+
+            last_token = TokenType.ClosingBracket;
+        }
+
+        private void evaluateOperator(char c) {
+            TokenOperator op;
+            if (last_token != TokenType.Number && last_token != TokenType.ClosingBracket && c == '-')
+                op = new TokenOperator('~');
+            else {
+                op = new TokenOperator(c);
+            }
+
+            if (op.getOperator() == OpType.None)
+                throw new IllegalArgumentException("Illegal operator");
+
+            while (!stack.isEmpty() && compareToOp(op, stack.peek()) < 0)
+                result.add(stack.pop());
+            stack.push(op);
+
+            last_token = TokenType.Operator;
+        }
+
+        private void processChar(char c) {
+            if (Character.isDigit(c))
+                accumulateNumber(c);
+            else {
+                if (!Character.isWhitespace(c)) {
+                    if (!is_acc_empty)
+                        pushAccToStackAsNumber();
+
+                    if (c == '(')
+                        pushOpeningBracketToStack();
+                    else if (c == ')')
+                        popUntilOpeningBracket();
+                    else
+                        evaluateOperator(c);
+
+                    is_whitespace_after_acc = false;
+                } else if (!is_acc_empty)
+                    is_whitespace_after_acc = true;
+            }
+        }
+
+        public Token[] parse() {
+            for (char c : expr.toCharArray())
+                processChar(c);
+
+            if (!is_acc_empty)
+                result.add(new TokenNumber(number_acc.toString()));
+            while (!stack.isEmpty())
+                result.add(stack.pop());
+
+            return result.toArray(new Token[0]);
+        }
+    }
+
+    private class Evaluator {
+        private Token[] tokens;
+        private Stack<Token> stack;
+
+        public Evaluator(Token[] tokens) {
+            this.tokens = tokens;
+            stack = new Stack<>();
+        }
+
+        private TokenNumber popNumberFromStack() {
+            if (stack.isEmpty())
+                throw new IllegalArgumentException("Insufficient operand");
+            Token t = stack.pop();
+            if (t.getType() != TokenType.Number)
+                throw new IllegalArgumentException("Illegal operand token type");
+
+            return t.asNumber();
+        }
+
+        private long applyBinaryOperator(TokenOperator t) {
+            TokenNumber a, b;
+            b = popNumberFromStack();
+            a = popNumberFromStack();
+
+            return t.apply(a, b);
+        }
+
+        private long applyUnaryOperator(TokenOperator t) {
+            return t.apply(popNumberFromStack());
+        }
+
+        private void applyOperatorAndPushResultToStack(TokenOperator t) {
+            long result;
+            if (t.isUnaryOperator())
+                result = applyUnaryOperator(t);
+            else
+                result = applyBinaryOperator(t);
+
+            stack.push(new TokenNumber(result));
+        }
+
+        private void pushNumberToStack(TokenNumber t) {
+            stack.push(t);
+        }
+
+        private void processToken(Token t) {
+            if (t.getType() == TokenType.Operator)
+                applyOperatorAndPushResultToStack(t.asOperator());
+            else if (t.getType() == TokenType.Number)
+                pushNumberToStack(t.asNumber());
+            else
+                throw new IllegalArgumentException("Illegal token on evaluation");
+        }
+
+        public long evaluate() {
+            for (Token t : tokens)
+                processToken(t);
+
+            if (stack.isEmpty() || stack.peek().getType() != TokenType.Number)
+                throw new IllegalArgumentException("Mismatched operator and operand");
+
+            long result = stack.pop().asNumber().getNumber();
+
+            if (!stack.isEmpty())
+                throw new IllegalArgumentException("Mismatched operator and operand");
+
+            return result;
+        }
+
+    }
+
     public static void main(String args[]) {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
@@ -214,105 +376,17 @@ public class CalculatorTest {
 
     private void processInput(String input) {
         try {
-            Token[] tokens = infixToPostfix(input);
-            long result = evaluateInfix(tokens);
+            Parser parser = new Parser(input);
+            Token[] tokens = parser.parse();
+
+            Evaluator evaluator = new Evaluator(tokens);
+            long result = evaluator.evaluate();
+
             System.out.print(Arrays.stream(tokens).map(t -> t.toString()).collect(Collectors.joining(" ")));
             System.out.println();
             System.out.println(result);
         } catch (IllegalArgumentException e) {
             System.out.println("ERROR");
         }
-    }
-
-    private long evaluateInfix(Token[] tokens) {
-        Stack<Token> stack = new Stack<>();
-
-        for (Token t : tokens) {
-            if (t.getType() == TokenType.Operator)
-                t.asOperator().applyWithStack(stack);
-            else if (t.getType() == TokenType.Number)
-                stack.push(t);
-            else
-                throw new IllegalArgumentException();
-        }
-
-        if (stack.isEmpty() || stack.peek().getType() != TokenType.Number)
-            throw new IllegalArgumentException();
-        long result = stack.pop().asNumber().getNumber();
-        if (!stack.isEmpty())
-            throw new IllegalArgumentException();
-        return result;
-    }
-
-    private Token[] infixToPostfix(String expr) {
-        Stack<Token> stack = new Stack<>();
-        ArrayList<Token> result = new ArrayList<>();
-
-        StringBuilder number_acc = new StringBuilder();
-        boolean is_acc_empty = true;
-        boolean is_whitespace_after_acc = false;
-        TokenType last_token = TokenType.None;
-
-        for (char c : expr.toCharArray()) {
-            if (Character.isDigit(c)) {
-                if (is_whitespace_after_acc)
-                    throw new IllegalArgumentException();
-
-                number_acc.append(c);
-                is_acc_empty = false;
-
-                last_token = TokenType.Number;
-            } else {
-                if (!Character.isWhitespace(c)) {
-                    if (!is_acc_empty) {
-                        result.add(new TokenNumber(number_acc.toString()));
-                        number_acc.setLength(0);
-                        is_acc_empty = true;
-                    }
-
-                    if (c == '(') {
-                        stack.push(new TokenBracket());
-
-                        last_token = TokenType.OpeningBracket;
-                    } else if (c == ')') {
-                        if (last_token == TokenType.OpeningBracket)
-                            throw new IllegalArgumentException();
-
-                        while (!stack.isEmpty() && stack.peek().getType() != TokenType.OpeningBracket)
-                            result.add(stack.pop());
-
-                        if (stack.isEmpty())
-                            throw new IllegalArgumentException();
-                        else
-                            stack.pop();
-
-                        last_token = TokenType.ClosingBracket;
-                    } else {
-                        if (last_token != TokenType.Number && last_token != TokenType.ClosingBracket && c == '-')
-                            c = '~';
-                        TokenOperator op = new TokenOperator(c);
-                        if (op.getOperator() == OpType.None)
-                            throw new IllegalArgumentException();
-                        while (!stack.isEmpty() && compareToOp(op, stack.peek()) < 0)
-                            result.add(stack.pop());
-                        stack.push(op);
-
-                        last_token = TokenType.Operator;
-                    }
-
-                    is_whitespace_after_acc = false;
-                } else {
-                    if (!is_acc_empty)
-                        is_whitespace_after_acc = true;
-                }
-            }
-        }
-
-        if (!is_acc_empty)
-            result.add(new TokenNumber(number_acc.toString()));
-        while (!stack.isEmpty())
-            result.add(stack.pop());
-
-        return result.toArray(new Token[0]);
     }
 }
