@@ -52,6 +52,8 @@ public class TokenOperator extends Token {
                 throw new IllegalArgumentException("Arithmetic error: cannot divide with 0");
             return a.getNumber() % b.getNumber();
         case Exponent:
+            if (a.getNumber() == 0 && b.getNumber() < 0)
+                throw new IllegalArgumentException("Arithmetic error: cannot power 0 with negative number");
             return (long) Math.pow(a.getNumber(), b.getNumber());
         default:
             throw new IllegalArgumentException("Illegal operator");
