@@ -42,3 +42,4 @@ gradle-app.setting
 
 **/bin/
 
+!**/data.tar.gz
