@@ -1,3 +1,9 @@
+/*
+ * Test code and test cases are written
+ * by kipa00 and modified by pbzweihander.
+ * All right reserved by kipa00.
+ * https://site.thekipa.com/charsnine/
+ */
 
 import java.io.DataInputStream;
 import java.io.FileInputStream;
