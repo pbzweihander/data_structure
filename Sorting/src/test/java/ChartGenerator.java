@@ -9,15 +9,11 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 public class ChartGenerator {
     private static final Random RANDOM = new Random();
-    private static final int FROM_N = 1000;
-    private static final int TO_N = 10000;
-    private static final int STEP = 100;
     private static final int REPEAT = 20;
 
     private static int[] generateRandomCases(int n) {
@@ -166,39 +162,44 @@ public class ChartGenerator {
 
     @Test
     public void generateChart() throws IOException, InterruptedException {
-        XYSeriesCollection dataset_of_bubble = new XYSeriesCollection();
-        XYSeriesCollection dataset = new XYSeriesCollection();
-        int[] arrayOfN = generateArrayOfN(FROM_N, TO_N, STEP);
+        XYSeriesCollection datasetOfBubble = new XYSeriesCollection();
+        XYSeriesCollection datasetOfInsertion = new XYSeriesCollection();
+        XYSeriesCollection datasetOfOther = new XYSeriesCollection();
+        int[] arrayOfNForInsertion = generateArrayOfN(1000, 20000, 200);
+        int[] arrayOfNForBubble = generateArrayOfN(1000, 10000, 100);
+        int[] arrayOfNForOther = generateArrayOfN(1000, 80000, 800);
 
         ArrayList<ResultingThread<XYSeries>> threads = new ArrayList<>();
 
-        ResultingThread<XYSeries> bubble_thread = new SortSeriesGenerater<BubbleSort>(BubbleSort.class, "Bubble",
-                arrayOfN);
-        threads.add(new SortSeriesGenerater<InsertionSort>(InsertionSort.class, "Insertion", arrayOfN));
-        threads.add(new SortSeriesGenerater<HeapSort>(HeapSort.class, "Heap", arrayOfN));
-        threads.add(new SortSeriesGenerater<MergeSort>(MergeSort.class, "Merge", arrayOfN));
-        threads.add(new SortSeriesGenerater<QuickSort>(QuickSort.class, "Quick", arrayOfN));
-        threads.add(new SortSeriesGenerater<RadixSort>(RadixSort.class, "Radix", arrayOfN));
+        threads.add(new SortSeriesGenerater<BubbleSort>(BubbleSort.class, "Bubble", arrayOfNForBubble));
+        threads.add(new SortSeriesGenerater<InsertionSort>(InsertionSort.class, "Insertion", arrayOfNForInsertion));
+        threads.add(new SortSeriesGenerater<HeapSort>(HeapSort.class, "Heap", arrayOfNForOther));
+        threads.add(new SortSeriesGenerater<MergeSort>(MergeSort.class, "Merge", arrayOfNForOther));
+        threads.add(new SortSeriesGenerater<QuickSort>(QuickSort.class, "Quick", arrayOfNForOther));
+        threads.add(new SortSeriesGenerater<RadixSort>(RadixSort.class, "Radix", arrayOfNForOther));
 
-        bubble_thread.start();
         for (Thread t : threads)
             t.start();
         for (Thread t : threads)
             t.join();
-        bubble_thread.join();
 
-        dataset_of_bubble.addSeries(bubble_thread.getResult());
+        datasetOfBubble.addSeries(threads.remove(0).getResult());
+        datasetOfInsertion.addSeries(threads.remove(0).getResult());
         for (ResultingThread<XYSeries> t : threads)
-            dataset.addSeries(t.getResult());
+            datasetOfOther.addSeries(t.getResult());
 
-        JFreeChart chart = ChartFactory.createScatterPlot("SortingTest", "N", "Time", dataset, PlotOrientation.VERTICAL,
-                true, false, false);
-        JFreeChart chart_of_bubble = ChartFactory.createScatterPlot("Bubble Sort", "N", "Time", dataset_of_bubble,
+        JFreeChart chartOfBubble = ChartFactory.createScatterPlot("Bubble Sort", "N", "Time", datasetOfBubble,
                 PlotOrientation.VERTICAL, false, false, false);
+        JFreeChart chartOfInsertion = ChartFactory.createScatterPlot("Insertion Sort", "N", "Time", datasetOfInsertion,
+                PlotOrientation.VERTICAL, false, false ,false);
+        JFreeChart chartOfOther = ChartFactory.createScatterPlot("Other Sorts", "N", "Time", datasetOfOther, PlotOrientation.VERTICAL,
+                true, false, false);
 
-        File file = new File("chart.png");
-        File file_for_bubble = new File("chart_bubble.png");
-        ChartUtilities.saveChartAsPNG(file, chart, 800, 600);
-        ChartUtilities.saveChartAsPNG(file_for_bubble, chart_of_bubble, 800, 600);
+        File fileForBubble = new File("chart_bubble.png");
+        File fileForInsertion = new File("chart_insertion.png");
+        File fileForOther = new File("chart_other.png");
+        ChartUtilities.saveChartAsPNG(fileForBubble, chartOfBubble, 800, 600);
+        ChartUtilities.saveChartAsPNG(fileForInsertion, chartOfInsertion, 800, 600);
+        ChartUtilities.saveChartAsPNG(fileForOther, chartOfOther, 800, 600);
     }
 }
