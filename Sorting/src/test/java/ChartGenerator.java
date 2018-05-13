@@ -99,16 +99,17 @@ public class ChartGenerator {
                 t.start();
             }
 
-            time = 0;
+            ArrayList<Long> times = new ArrayList<>();
             for (SortThread<T> t : threads) {
                 try {
                     t.join();
-                    time += t.getResult();
+                    times.add(t.getResult());
                 } catch (InterruptedException e) {
                     e.printStackTrace(System.err);
                 }
             }
-            time /= repeat;
+            times.sort(Long::compareTo);
+            time = times.get(times.size() / 2);
 
             System.out.println(getName() + " thread end with time " + time);
         }
