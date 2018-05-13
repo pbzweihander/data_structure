@@ -164,36 +164,41 @@ public class ChartGenerator {
         }
     }
 
-    private XYDataset generateDataset() throws InterruptedException {
+    @Test
+    public void generateChart() throws IOException, InterruptedException {
+        XYSeriesCollection dataset_of_bubble = new XYSeriesCollection();
         XYSeriesCollection dataset = new XYSeriesCollection();
         int[] arrayOfN = generateArrayOfN(FROM_N, TO_N, STEP);
 
         ArrayList<ResultingThread<XYSeries>> threads = new ArrayList<>();
 
-        threads.add(new SortSeriesGenerater<BubbleSort>(BubbleSort.class, "Bubble", arrayOfN));
+        ResultingThread<XYSeries> bubble_thread = new SortSeriesGenerater<BubbleSort>(BubbleSort.class, "Bubble",
+                arrayOfN);
         threads.add(new SortSeriesGenerater<InsertionSort>(InsertionSort.class, "Insertion", arrayOfN));
         threads.add(new SortSeriesGenerater<HeapSort>(HeapSort.class, "Heap", arrayOfN));
         threads.add(new SortSeriesGenerater<MergeSort>(MergeSort.class, "Merge", arrayOfN));
         threads.add(new SortSeriesGenerater<QuickSort>(QuickSort.class, "Quick", arrayOfN));
         threads.add(new SortSeriesGenerater<RadixSort>(RadixSort.class, "Radix", arrayOfN));
 
+        bubble_thread.start();
         for (Thread t : threads)
             t.start();
         for (Thread t : threads)
             t.join();
+        bubble_thread.join();
+
+        dataset_of_bubble.addSeries(bubble_thread.getResult());
         for (ResultingThread<XYSeries> t : threads)
             dataset.addSeries(t.getResult());
 
-        return dataset;
-    }
-
-    @Test
-    public void generateChart() throws IOException, InterruptedException {
-        XYDataset dataset = generateDataset();
         JFreeChart chart = ChartFactory.createScatterPlot("SortingTest", "N", "Time", dataset, PlotOrientation.VERTICAL,
                 true, false, false);
+        JFreeChart chart_of_bubble = ChartFactory.createScatterPlot("Bubble Sort", "N", "Time", dataset_of_bubble,
+                PlotOrientation.VERTICAL, false, false, false);
 
         File file = new File("chart.png");
+        File file_for_bubble = new File("chart_bubble.png");
         ChartUtilities.saveChartAsPNG(file, chart, 800, 600);
+        ChartUtilities.saveChartAsPNG(file_for_bubble, chart_of_bubble, 800, 600);
     }
 }
