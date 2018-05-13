@@ -78,9 +78,9 @@ public class ChartGenerator {
                 ISort sorter = sorterType.newInstance();
                 sorter.with(data);
 
-                t = System.currentTimeMillis();
+                t = System.nanoTime();
                 sorter.sort();
-                time = System.currentTimeMillis() - t;
+                time = System.nanoTime() - t;
             } catch (InstantiationException e) {
                 e.printStackTrace(System.err);
             } catch (IllegalAccessException e) {
