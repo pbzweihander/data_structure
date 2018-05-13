@@ -3,12 +3,14 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.xy.XYDataItem;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
@@ -149,8 +151,21 @@ public class ChartGenerator {
                     e.printStackTrace(System.err);
                 }
             }
+
+            ArrayList<XYDataItem> items = new ArrayList<>();
             for (RepeatSortThread<T> t : threads)
-                series.add(t.getN(), t.getResult());
+                items.add(new XYDataItem(t.getN(), t.getResult()));
+
+            List<XYDataItem> subList = items.subList(items.size() - 5, items.size());
+            long sum = 0;
+            for (XYDataItem item : subList)
+                sum += item.getY().longValue();
+            final long average = sum / 5;
+
+            items.removeIf(item -> (item.getY().longValue() > average));
+
+            for (XYDataItem item : items)
+                series.add(item);
 
             System.out.println(getName() + " thread end");
         }
@@ -191,9 +206,9 @@ public class ChartGenerator {
         JFreeChart chartOfBubble = ChartFactory.createScatterPlot("Bubble Sort", "N", "Time", datasetOfBubble,
                 PlotOrientation.VERTICAL, false, false, false);
         JFreeChart chartOfInsertion = ChartFactory.createScatterPlot("Insertion Sort", "N", "Time", datasetOfInsertion,
-                PlotOrientation.VERTICAL, false, false ,false);
-        JFreeChart chartOfOther = ChartFactory.createScatterPlot("Other Sorts", "N", "Time", datasetOfOther, PlotOrientation.VERTICAL,
-                true, false, false);
+                PlotOrientation.VERTICAL, false, false, false);
+        JFreeChart chartOfOther = ChartFactory.createScatterPlot("Other Sorts", "N", "Time", datasetOfOther,
+                PlotOrientation.VERTICAL, true, false, false);
 
         File fileForBubble = new File("chart_bubble.png");
         File fileForInsertion = new File("chart_insertion.png");
