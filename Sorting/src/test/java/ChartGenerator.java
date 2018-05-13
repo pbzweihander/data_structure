@@ -3,6 +3,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
@@ -17,6 +18,9 @@ import org.jfree.data.xy.XYSeriesCollection;
 public class ChartGenerator {
     private static final Random RANDOM = new Random();
     private static final int REPEAT = 50;
+
+    private static HashMap<String, Integer> progressMap = new HashMap<>();
+    private static HashMap<String, Integer> countMap = new HashMap<>();
 
     private static int[] generateRandomCases(int n) {
         return RANDOM.ints(n).toArray();
@@ -35,6 +39,16 @@ public class ChartGenerator {
         return arr;
     }
 
+    private static void printProgress() {
+        countMap.entrySet().forEach(entry -> {
+            String n = entry.getKey();
+            int p = progressMap.get(n);
+            int c = entry.getValue();
+            System.out.println(n + " " + p + "/" + c + " " + (p * 100 / c) + "%");
+        });
+        System.out.println();
+    }
+
     private abstract class ResultingThread<T> extends Thread {
         public abstract T getResult();
     }
@@ -42,16 +56,21 @@ public class ChartGenerator {
     private class SortThread<T extends ISort> extends Thread {
         private int n;
         private Class<T> sorterType;
+        private String sortName;
         private long time;
 
-        public SortThread(Class<T> sorterType, String name, int n) {
+        public SortThread(Class<T> sorterType, String sortName, String threadName, int n) {
             this.sorterType = sorterType;
-            setName(name);
+            this.sortName = sortName;
+            setName(threadName);
             this.n = n;
+
+            countMap.replace(sortName, countMap.get(sortName) + 1);
         }
 
         public void run() {
-            System.out.println(getName() + " thread start");
+            // System.out.println(getName() + " thread start");
+            printProgress();
 
             long t;
             int[] data = generateRandomCases(n);
@@ -68,7 +87,9 @@ public class ChartGenerator {
                 e.printStackTrace(System.err);
             }
 
-            System.out.println(getName() + " thread end with time " + time);
+            progressMap.replace(sortName, progressMap.get(sortName) + 1);
+            // System.out.println(getName() + " thread end with time " + time);
+            printProgress();
         }
 
         public long getResult() {
@@ -79,22 +100,24 @@ public class ChartGenerator {
     private class RepeatSortThread<T extends ISort> extends Thread {
         private int n;
         private Class<T> sorterType;
+        private String sortName;
         private int repeat;
         private long time;
 
-        public RepeatSortThread(Class<T> sorterType, String name, int n, int repeat) {
+        public RepeatSortThread(Class<T> sorterType, String sortName, String threadName, int n, int repeat) {
             this.sorterType = sorterType;
-            setName(name);
+            this.sortName = sortName;
+            setName(threadName);
             this.repeat = repeat;
             this.n = n;
         }
 
         public void run() {
-            System.out.println(getName() + " thread start");
+            // System.out.println(getName() + " thread start");
             ArrayList<SortThread<T>> threads = new ArrayList<>();
 
             for (int i = 0; i < repeat; i++) {
-                SortThread<T> t = new SortThread<T>(sorterType, getName() + " " + i, n);
+                SortThread<T> t = new SortThread<T>(sorterType, sortName, getName() + " " + i, n);
                 threads.add(t);
                 t.start();
             }
@@ -111,7 +134,7 @@ public class ChartGenerator {
             times.sort(Long::compareTo);
             time = times.get(times.size() / 2);
 
-            System.out.println(getName() + " thread end with time " + time);
+            // System.out.println(getName() + " thread end with time " + time);
         }
 
         public long getResult() {
@@ -135,13 +158,16 @@ public class ChartGenerator {
             this.arrayOfN = arrayOfN;
             threads = new ArrayList<>();
             series = new XYSeries(getName());
+
+            progressMap.put(name, 0);
+            countMap.put(name, 0);
         }
 
         public void run() {
-            System.out.println(getName() + " thread start");
+            // System.out.println(getName() + " thread start");
 
             for (int n : arrayOfN) {
-                RepeatSortThread<T> t = new RepeatSortThread<>(sorterType, getName() + " " + n, n, REPEAT);
+                RepeatSortThread<T> t = new RepeatSortThread<>(sorterType, getName(), getName() + " " + n, n, REPEAT);
                 threads.add(t);
                 t.start();
             }
@@ -168,7 +194,7 @@ public class ChartGenerator {
             for (XYDataItem item : items)
                 series.add(item);
 
-            System.out.println(getName() + " thread end");
+            // System.out.println(getName() + " thread end");
         }
 
         public XYSeries getResult() {
@@ -185,7 +211,7 @@ public class ChartGenerator {
         int[] arrayOfNForBubble = generateArrayOfN(1000, 10000, 100);
         int[] arrayOfNForInsertion = generateArrayOfN(1000, 20000, 200);
         int[] arrayOfNForRadix = generateArrayOfN(1000, 80000, 800);
-        int[] arrayOfNForOther = generateArrayOfN(100000, 1000000, 10000);
+        int[] arrayOfNForOther = generateArrayOfN(10000, 200000, 2000);
 
         ArrayList<ResultingThread<XYSeries>> threads = new ArrayList<>();
 
