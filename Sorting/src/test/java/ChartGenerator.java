@@ -99,26 +99,24 @@ public class ChartGenerator {
 
     private class RepeatSortThread<T extends ISort> extends Thread {
         private int n;
-        private Class<T> sorterType;
-        private String sortName;
-        private int repeat;
         private long time;
+        private ArrayList<SortThread<T>> threads;
 
         public RepeatSortThread(Class<T> sorterType, String sortName, String threadName, int n, int repeat) {
-            this.sorterType = sorterType;
-            this.sortName = sortName;
             setName(threadName);
-            this.repeat = repeat;
             this.n = n;
+
+            threads = new ArrayList<>();
+            for (int i = 0; i < repeat; i++) {
+                SortThread<T> t = new SortThread<T>(sorterType, sortName, getName() + " " + i, n);
+                threads.add(t);
+            }
         }
 
         public void run() {
             // System.out.println(getName() + " thread start");
-            ArrayList<SortThread<T>> threads = new ArrayList<>();
 
-            for (int i = 0; i < repeat; i++) {
-                SortThread<T> t = new SortThread<T>(sorterType, sortName, getName() + " " + i, n);
-                threads.add(t);
+            for (Thread t : threads) {
                 t.start();
             }
 
@@ -147,30 +145,29 @@ public class ChartGenerator {
     }
 
     private class SortSeriesGenerater<T extends ISort> extends ResultingThread<XYSeries> {
-        private Class<T> sorterType;
-        private int[] arrayOfN;
         private ArrayList<RepeatSortThread<T>> threads;
         private XYSeries series;
 
         public SortSeriesGenerater(Class<T> sorterType, String name, int[] arrayOfN) {
-            this.sorterType = sorterType;
             setName(name);
-            this.arrayOfN = arrayOfN;
             threads = new ArrayList<>();
             series = new XYSeries(getName());
 
             progressMap.put(name, 0);
             countMap.put(name, 0);
+
+            for (int n : arrayOfN) {
+                RepeatSortThread<T> t = new RepeatSortThread<>(sorterType, getName(), getName() + " " + n, n, REPEAT);
+                threads.add(t);
+            }
         }
 
         public void run() {
             // System.out.println(getName() + " thread start");
 
-            for (int n : arrayOfN) {
-                RepeatSortThread<T> t = new RepeatSortThread<>(sorterType, getName(), getName() + " " + n, n, REPEAT);
-                threads.add(t);
+            for (Thread t : threads)
                 t.start();
-            }
+
             for (Thread t : threads) {
                 try {
                     t.join();
@@ -211,7 +208,7 @@ public class ChartGenerator {
         int[] arrayOfNForBubble = generateArrayOfN(1000, 10000, 100);
         int[] arrayOfNForInsertion = generateArrayOfN(1000, 20000, 200);
         int[] arrayOfNForRadix = generateArrayOfN(1000, 80000, 800);
-        int[] arrayOfNForOther = generateArrayOfN(10000, 200000, 2000);
+        int[] arrayOfNForOther = generateArrayOfN(1000, 80000, 800);
 
         ArrayList<ResultingThread<XYSeries>> threads = new ArrayList<>();
 
