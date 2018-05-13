@@ -8,12 +8,14 @@ repositories {
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.+'
+    testCompile group: 'jfree', name: 'jfreechart', version: '1.0.+'
 }
 
 test {
     afterTest { desc, result ->
         logger.quiet "Executing test ${desc.className}.${desc.name} with result: ${result.resultType}"
     }
+    testLogging.showStandardStreams = true
 }
 
 apply plugin: 'application'

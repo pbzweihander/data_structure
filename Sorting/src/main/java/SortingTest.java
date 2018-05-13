@@ -35,38 +35,21 @@ public class SortingTest {
 
             // 숫자 입력을 다 받았으므로 정렬 방법을 받아 그에 맞는 정렬을 수행한다.
             while (true) {
-                int[] newvalue = (int[]) value.clone(); // 원래 값의 보호를 위해 복사본을 생성한다.
 
-                String command = br.readLine();
+                String line = br.readLine();
+                char command = line.charAt(0);
 
-                long t = System.currentTimeMillis();
-                switch (command.charAt(0)) {
-                case 'B': // Bubble Sort
-                    newvalue = DoBubbleSort(newvalue);
-                    break;
-                case 'I': // Insertion Sort
-                    newvalue = DoInsertionSort(newvalue);
-                    break;
-                case 'H': // Heap Sort
-                    newvalue = DoHeapSort(newvalue);
-                    break;
-                case 'M': // Merge Sort
-                    newvalue = DoMergeSort(newvalue);
-                    break;
-                case 'Q': // Quick Sort
-                    newvalue = DoQuickSort(newvalue);
-                    break;
-                case 'R': // Radix Sort
-                    newvalue = DoRadixSort(newvalue);
-                    break;
-                case 'X':
-                    return; // 프로그램을 종료한다.
-                default:
-                    throw new IOException("잘못된 정렬 방법을 입력했습니다.");
-                }
+                if (command == 'X')
+                    return;
+
+                long t, dt;
+                t = System.currentTimeMillis();
+                int[] newvalue = doSort(value, command);
+                dt = System.currentTimeMillis() - t;
+
                 if (isRandom) {
                     // 난수일 경우 수행시간을 출력한다.
-                    System.out.println((System.currentTimeMillis() - t) + " ms");
+                    System.out.println(dt + " ms");
                 } else {
                     // 난수가 아닐 경우 정렬된 결과값을 출력한다.
                     for (int i = 0; i < newvalue.length; i++) {
@@ -79,43 +62,30 @@ public class SortingTest {
         }
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    private static int[] DoBubbleSort(int[] value) {
-        // TODO : Bubble Sort 를 구현하라.
-        // value는 정렬안된 숫자들의 배열이며 value.length 는 배열의 크기가 된다.
-        // 결과로 정렬된 배열은 리턴해 주어야 하며, 두가지 방법이 있으므로 잘 생각해서 사용할것.
-        // 주어진 value 배열에서 안의 값만을 바꾸고 value를 다시 리턴하거나
-        // 같은 크기의 새로운 배열을 만들어 그 배열을 리턴할 수도 있다.
-        return (value);
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    private static int[] DoInsertionSort(int[] value) {
-        // TODO : Insertion Sort 를 구현하라.
-        return (value);
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    private static int[] DoHeapSort(int[] value) {
-        // TODO : Heap Sort 를 구현하라.
-        return (value);
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    private static int[] DoMergeSort(int[] value) {
-        // TODO : Merge Sort 를 구현하라.
-        return (value);
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    private static int[] DoQuickSort(int[] value) {
-        // TODO : Quick Sort 를 구현하라.
-        return (value);
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    private static int[] DoRadixSort(int[] value) {
-        // TODO : Radix Sort 를 구현하라.
-        return (value);
+    private static int[] doSort(int[] value, char command) throws IOException {
+        ISort sorter;
+        switch (command) {
+        case 'B': // Bubble Sort
+            sorter = new BubbleSort(value);
+            break;
+        case 'I': // Insertion Sort
+            sorter = new InsertionSort(value);
+            break;
+        case 'H': // Heap Sort
+            sorter = new HeapSort(value);
+            break;
+        case 'M': // Merge Sort
+            sorter = new MergeSort(value);
+            break;
+        case 'Q': // Quick Sort
+            sorter = new QuickSort(value);
+            break;
+        case 'R': // Radix Sort
+            sorter = new RadixSort(value);
+            break;
+        default:
+            throw new IOException("잘못된 정렬 방법을 입력했습니다.");
+        }
+        return sorter.sort();
     }
 }
