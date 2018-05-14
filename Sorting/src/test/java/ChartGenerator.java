@@ -214,7 +214,7 @@ public class ChartGenerator {
     @Test
     public void generateChart() throws IOException, InterruptedException {
         int[] arrayOfNForSlow = generateArrayOfN(1000, 20000, 200);
-        int[] arrayOfNForFast = generateArrayOfN(1000, 100000, 1000);
+        int[] arrayOfNForFast = generateArrayOfN(1000, 50000, 500);
 
         ArrayList<ResultingThread<XYSeries>> threads = new ArrayList<>();
 
@@ -225,10 +225,12 @@ public class ChartGenerator {
         threads.add(new SortSeriesGenerater<MergeSort>(MergeSort.class, "Merge", arrayOfNForFast));
         threads.add(new SortSeriesGenerater<QuickSort>(QuickSort.class, "Quick", arrayOfNForFast));
 
-        for (Thread t : threads)
+        for (Thread t : threads) {
             t.start();
-        for (Thread t : threads)
             t.join();
+
+        }
+        // for (Thread t : threads)
 
         if (Files.notExists(Paths.get("chart")))
             Files.createDirectories(Paths.get("chart"));
