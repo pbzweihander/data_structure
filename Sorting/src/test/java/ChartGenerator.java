@@ -2,6 +2,8 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,6 +49,16 @@ public class ChartGenerator {
             System.out.println(n + " " + p + "/" + c + " " + (p * 100 / c) + "%");
         });
         System.out.println();
+    }
+
+    private class XYSeriesCollectionWithName {
+        public XYSeriesCollection collection;
+        public String name;
+
+        public XYSeriesCollectionWithName(String name, XYSeriesCollection collection) {
+            this.name = name;
+            this.collection = collection;
+        }
     }
 
     private abstract class ResultingThread<T> extends Thread {
@@ -201,51 +213,33 @@ public class ChartGenerator {
 
     @Test
     public void generateChart() throws IOException, InterruptedException {
-        XYSeriesCollection datasetOfBubble = new XYSeriesCollection();
-        XYSeriesCollection datasetOfInsertion = new XYSeriesCollection();
-        XYSeriesCollection datasetOfRadix = new XYSeriesCollection();
-        XYSeriesCollection datasetOfOther = new XYSeriesCollection();
-        int[] arrayOfNForBubble = generateArrayOfN(1000, 10000, 100);
-        int[] arrayOfNForInsertion = generateArrayOfN(1000, 20000, 200);
-        int[] arrayOfNForRadix = generateArrayOfN(1000, 80000, 800);
-        int[] arrayOfNForOther = generateArrayOfN(1000, 80000, 800);
+        int[] arrayOfNForSlow = generateArrayOfN(1000, 20000, 200);
+        int[] arrayOfNForFast = generateArrayOfN(1000, 100000, 1000);
 
         ArrayList<ResultingThread<XYSeries>> threads = new ArrayList<>();
 
-        threads.add(new SortSeriesGenerater<BubbleSort>(BubbleSort.class, "Bubble", arrayOfNForBubble));
-        threads.add(new SortSeriesGenerater<InsertionSort>(InsertionSort.class, "Insertion", arrayOfNForInsertion));
-        threads.add(new SortSeriesGenerater<RadixSort>(RadixSort.class, "Radix", arrayOfNForRadix));
-        threads.add(new SortSeriesGenerater<HeapSort>(HeapSort.class, "Heap", arrayOfNForOther));
-        threads.add(new SortSeriesGenerater<MergeSort>(MergeSort.class, "Merge", arrayOfNForOther));
-        threads.add(new SortSeriesGenerater<QuickSort>(QuickSort.class, "Quick", arrayOfNForOther));
+        threads.add(new SortSeriesGenerater<BubbleSort>(BubbleSort.class, "Bubble", arrayOfNForSlow));
+        threads.add(new SortSeriesGenerater<InsertionSort>(InsertionSort.class, "Insertion", arrayOfNForSlow));
+        threads.add(new SortSeriesGenerater<RadixSort>(RadixSort.class, "Radix", arrayOfNForFast));
+        threads.add(new SortSeriesGenerater<HeapSort>(HeapSort.class, "Heap", arrayOfNForFast));
+        threads.add(new SortSeriesGenerater<MergeSort>(MergeSort.class, "Merge", arrayOfNForFast));
+        threads.add(new SortSeriesGenerater<QuickSort>(QuickSort.class, "Quick", arrayOfNForFast));
 
         for (Thread t : threads)
             t.start();
         for (Thread t : threads)
             t.join();
 
-        datasetOfBubble.addSeries(threads.remove(0).getResult());
-        datasetOfInsertion.addSeries(threads.remove(0).getResult());
-        datasetOfRadix.addSeries(threads.remove(0).getResult());
-        for (ResultingThread<XYSeries> t : threads)
-            datasetOfOther.addSeries(t.getResult());
+        if (Files.notExists(Paths.get("chart")))
+            Files.createDirectories(Paths.get("chart"));
 
-        JFreeChart chartOfBubble = ChartFactory.createScatterPlot("Bubble Sort", "N", "Time", datasetOfBubble,
-                PlotOrientation.VERTICAL, false, false, false);
-        JFreeChart chartOfInsertion = ChartFactory.createScatterPlot("Insertion Sort", "N", "Time", datasetOfInsertion,
-                PlotOrientation.VERTICAL, false, false, false);
-        JFreeChart chartOfRadix = ChartFactory.createScatterPlot("Radix Sort", "N", "Time", datasetOfRadix,
-                PlotOrientation.VERTICAL, false, false, false);
-        JFreeChart chartOfOther = ChartFactory.createScatterPlot("Other Sorts", "N", "Time", datasetOfOther,
-                PlotOrientation.VERTICAL, true, false, false);
-
-        File fileForBubble = new File("chart_bubble.png");
-        File fileForInsertion = new File("chart_insertion.png");
-        File fileForRadix = new File("chart_radix.png");
-        File fileForOther = new File("chart_other.png");
-        ChartUtilities.saveChartAsPNG(fileForBubble, chartOfBubble, 800, 600);
-        ChartUtilities.saveChartAsPNG(fileForInsertion, chartOfInsertion, 800, 600);
-        ChartUtilities.saveChartAsPNG(fileForRadix, chartOfRadix, 800, 600);
-        ChartUtilities.saveChartAsPNG(fileForOther, chartOfOther, 800, 600);
+        for (ResultingThread<XYSeries> t : threads) {
+            XYSeriesCollection collection = new XYSeriesCollection();
+            collection.addSeries(t.getResult());
+            JFreeChart chart = ChartFactory.createScatterPlot(t.getName() + " Sort", "N", "Time (nanoseonds)",
+                    collection, PlotOrientation.VERTICAL, false, false, false);
+            File file = new File("chart/" + t.getName() + ".png");
+            ChartUtilities.saveChartAsPNG(file, chart, 800, 600);
+        }
     }
 }
