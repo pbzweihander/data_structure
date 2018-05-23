@@ -2,7 +2,6 @@ version: 2
 
 jobs:
   big_integer:
-    working_directory: ~/BigInteger
     docker:
       - image: circleci/openjdk:8-jdk
     steps:
@@ -13,6 +12,7 @@ jobs:
           - big-integer-
       - run:
           name: BigInteger Test
+          working_directory: ~/project/BigInteger
           command: gradle test
       - save_cache:
           paths:
@@ -20,7 +20,6 @@ jobs:
           key: big-integer-{{ checksum "build.gradle" }}
 
   movie_database:
-    working_directory: ~/MovieDatabase
     docker:
       - image: circleci/openjdk:8-jdk
     steps:
@@ -31,6 +30,7 @@ jobs:
           - movie-database-
       - run:
           name: MovieDatabase Test
+          working_directory: ~/project/MovieDatabase
           command: gradle test
       - save_cache:
           paths:
@@ -38,7 +38,6 @@ jobs:
           key: movie-database-{{ checksum "build.gradle" }}
 
   stack_calculator:
-    working_directory: ~/StackCalculator
     docker:
       - image: circleci/openjdk:8-jdk
     steps:
@@ -49,6 +48,7 @@ jobs:
           - stack-calculator-
       - run:
           name: StackCalculator Test
+          working_directory: ~/project/StackCalculator
           command: gradle test
       - save_cache:
           paths:
@@ -56,7 +56,6 @@ jobs:
           key: stack-calculator-{{ checksum "build.gradle" }}
 
   matching:
-    working_directory: ~/Matching
     docker:
       - image: circleci/openjdk:8-jdk
     steps:
@@ -67,6 +66,7 @@ jobs:
           - matching-
       - run:
           name: Matching Test
+          working_directory: ~/project/Matching
           command: gradle test
       - save_cache:
           paths:
