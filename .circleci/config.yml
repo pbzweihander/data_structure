@@ -15,8 +15,7 @@ jobs:
           working_directory: ~/project/BigInteger
           command: gradle test
       - store_artifacts:
-          path: ~/project/BigInteger/build/reports/tests/test/index.html
-          destination: big-integer-test.html
+          path: ~/project/BigInteger/build/reports/tests/test
       - save_cache:
           key: big-integer-{{ checksum "~/project/BigInteger/build.gradle" }}
           paths:
@@ -36,8 +35,7 @@ jobs:
           working_directory: ~/project/MovieDatabase
           command: gradle test
       - store_artifacts:
-          path: ~/project/MovieDatabase/build/reports/tests/test/index.html
-          destination: movie-database-test.html
+          path: ~/project/MovieDatabase/build/reports/tests/test
       - save_cache:
           key: movie-database-{{ checksum "~/project/MovieDatabase/build.gradle" }}
           paths:
@@ -57,8 +55,7 @@ jobs:
           working_directory: ~/project/StackCalculator
           command: gradle test
       - store_artifacts:
-          path: ~/project/StackCalculator/build/reports/tests/test/index.html
-          destination: stack-calculator-test.html
+          path: ~/project/StackCalculator/build/reports/tests/test
       - save_cache:
           key: stack-calculator-{{ checksum "~/project/StackCalculator/build.gradle" }}
           paths:
@@ -78,8 +75,7 @@ jobs:
           working_directory: ~/project/Matching
           command: gradle test
       - store_artifacts:
-          path: ~/project/Matching/build/reports/tests/test/index.html
-          destination: matching-test.html
+          path: ~/project/Matching/build/reports/tests/test
       - save_cache:
           key: matching-{{ checksum "~/project/Matching/build.gradle" }}
           paths:
