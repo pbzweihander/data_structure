@@ -8,16 +8,19 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-          - big-integer-{{ checksum "build.gradle" }}
+          - big-integer-{{ checksum "~/project/BigInteger/build.gradle" }}
           - big-integer-
       - run:
           name: BigInteger Test
           working_directory: ~/project/BigInteger
           command: gradle test
+      - store_artifacts:
+          path: ~/project/BigInteger/build/reports/tests/test/index.html
+          destination: big-integer-test.html
       - save_cache:
+          key: big-integer-{{ checksum "~/project/BigInteger/build.gradle" }}
           paths:
-            - ~/.gradle
-          key: big-integer-{{ checksum "build.gradle" }}
+            - ~/project/.gradle
 
   movie_database:
     docker:
@@ -26,16 +29,19 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-          - movie-database-{{ checksum "build.gradle" }}
+          - movie-database-{{ checksum "~/project/MovieDatabase/build.gradle" }}
           - movie-database-
       - run:
           name: MovieDatabase Test
           working_directory: ~/project/MovieDatabase
           command: gradle test
+      - store_artifacts:
+          path: ~/project/MovieDatabase/build/reports/tests/test/index.html
+          destination: movie-database-test.html
       - save_cache:
+          key: movie-database-{{ checksum "~/project/MovieDatabase/build.gradle" }}
           paths:
-            - ~/.gradle
-          key: movie-database-{{ checksum "build.gradle" }}
+            - ~/project/.gradle
 
   stack_calculator:
     docker:
@@ -44,16 +50,19 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-          - stack-calculator-{{ checksum "build.gradle" }}
+          - stack-calculator-{{ checksum "~/project/StackCalculator/build.gradle" }}
           - stack-calculator-
       - run:
           name: StackCalculator Test
           working_directory: ~/project/StackCalculator
           command: gradle test
+      - store_artifacts:
+          path: ~/project/StackCalculator/build/reports/tests/test/index.html
+          destination: stack-calculator-test.html
       - save_cache:
+          key: stack-calculator-{{ checksum "~/project/StackCalculator/build.gradle" }}
           paths:
-            - ~/.gradle
-          key: stack-calculator-{{ checksum "build.gradle" }}
+            - ~/project/.gradle
 
   matching:
     docker:
@@ -62,16 +71,19 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-          - matching-{{ checksum "build.gradle" }}
+          - matching-{{ checksum "~/project/Matching/build.gradle" }}
           - matching-
       - run:
           name: Matching Test
           working_directory: ~/project/Matching
           command: gradle test
+      - store_artifacts:
+          path: ~/project/Matching/build/reports/tests/test/index.html
+          destination: matching-test.html
       - save_cache:
+          key: matching-{{ checksum "~/project/Matching/build.gradle" }}
           paths:
-            - ~/.gradle
-          key: matching-{{ checksum "build.gradle" }}
+            - ~/project/.gradle
 
 workflows:
   version: 2
