@@ -1,7 +1,7 @@
 version: 2
 
 jobs:
-  big_integer:
+  big_integer_test:
     docker:
       - image: circleci/openjdk:8-jdk
     steps:
@@ -21,8 +21,20 @@ jobs:
           key: gradle-{{ checksum "~/project/BigInteger/build.gradle" }}
           paths:
             - ~/project/.gradle
+  big_integer_deploy:
+    docker:
+      - image: circleci/openjdk:8-jdk
+    steps:
+      - checkout
+      - run:
+          name: BigInteger Deploy
+          working_directory: ~/project/BigInteger/src/main/java
+          command: zip src.zip *.java
+      - store_artifacts:
+          path: ~/project/BigInteger/src/main/java/src.zip
+          destination: BigInteger.zip
 
-  movie_database:
+  movie_database_test:
     docker:
       - image: circleci/openjdk:8-jdk
     steps:
@@ -42,8 +54,20 @@ jobs:
           key: gradle-{{ checksum "~/project/MovieDatabase/build.gradle" }}
           paths:
             - ~/project/.gradle
+  movie_database_deploy:
+    docker:
+      - image: circleci/openjdk:8-jdk
+    steps:
+      - checkout
+      - run:
+          name: MovieDatabase Deploy
+          working_directory: ~/project/MovieDatabase/src/main/java
+          command: zip src.zip *.java
+      - store_artifacts:
+          path: ~/project/MovieDatabase/src/main/java/src.zip
+          destination: MovieDatabase.zip
 
-  stack_calculator:
+  stack_calculator_test:
     docker:
       - image: circleci/openjdk:8-jdk
     steps:
@@ -63,8 +87,20 @@ jobs:
           key: gradle-{{ checksum "~/project/StackCalculator/build.gradle" }}
           paths:
             - ~/project/.gradle
+  stack_calculator_deploy:
+    docker:
+      - image: circleci/openjdk:8-jdk
+    steps:
+      - checkout
+      - run:
+          name: StackCalculator Deploy
+          working_directory: ~/project/StackCalculator/src/main/java
+          command: zip src.zip *.java
+      - store_artifacts:
+          path: ~/project/StackCalculator/src/main/java/src.zip
+          destination: StackCalculator.zip
 
-  matching:
+  matching_test:
     docker:
       - image: circleci/openjdk:8-jdk
     steps:
@@ -84,12 +120,34 @@ jobs:
           key: gradle-{{ checksum "~/project/Matching/build.gradle" }}
           paths:
             - ~/project/.gradle
+  matching_deploy:
+    docker:
+      - image: circleci/openjdk:8-jdk
+    steps:
+      - checkout
+      - run:
+          name: Matching Deploy
+          working_directory: ~/project/Matching/src/main/java
+          command: zip src.zip *.java
+      - store_artifacts:
+          path: ~/project/Matching/src/main/java/src.zip
+          destination: Matching.zip
 
 workflows:
   version: 2
-  test_all:
+  big_integer:
     jobs:
-      - big_integer
-      - movie_database
-      - stack_calculator
-      - matching
+      - big_integer_test
+      - big_integer_deploy
+  movie_database:
+    jobs:
+      - movie_database_test
+      - movie_database_deploy
+  stack_calculator:
+    jobs:
+      - stack_calculator_test
+      - stack_calculator_deploy
+  matching:
+    jobs:
+      - matching_test
+      - matching_deploy
