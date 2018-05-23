@@ -1,0 +1,83 @@
+version: 2
+
+jobs:
+  big_integer:
+    working_directory: ~/BigInteger
+    docker:
+      - image: circleci/openjdk:8-jdk
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+          - big-integer-{{ checksum "build.gradle" }}
+          - big-integer-
+      - run:
+          name: BigInteger Test
+          command: gradle test
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: big-integer-{{ checksum "build.gradle" }}
+
+  movie_database:
+    working_directory: ~/MovieDatabase
+    docker:
+      - image: circleci/openjdk:8-jdk
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+          - movie-database-{{ checksum "build.gradle" }}
+          - movie-database-
+      - run:
+          name: MovieDatabase Test
+          command: gradle test
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: movie-database-{{ checksum "build.gradle" }}
+
+  stack_calculator:
+    working_directory: ~/StackCalculator
+    docker:
+      - image: circleci/openjdk:8-jdk
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+          - stack-calculator-{{ checksum "build.gradle" }}
+          - stack-calculator-
+      - run:
+          name: StackCalculator Test
+          command: gradle test
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: stack-calculator-{{ checksum "build.gradle" }}
+
+  matching:
+    working_directory: ~/Matching
+    docker:
+      - image: circleci/openjdk:8-jdk
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+          - matching-{{ checksum "build.gradle" }}
+          - matching-
+      - run:
+          name: Matching Test
+          command: gradle test
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: matching-{{ checksum "build.gradle" }}
+
+workflows:
+  version: 2
+  test_all:
+    jobs:
+      - big_integer
+      - movie_database
+      - stack_calculator
+      - matching
