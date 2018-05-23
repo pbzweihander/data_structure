@@ -138,16 +138,24 @@ workflows:
   big_integer:
     jobs:
       - big_integer_test
-      - big_integer_deploy
+      - big_integer_deploy:
+          requires:
+            - big_integer_test
   movie_database:
     jobs:
       - movie_database_test
-      - movie_database_deploy
+      - movie_database_deploy:
+          requires:
+            - movie_database_test
   stack_calculator:
     jobs:
       - stack_calculator_test
-      - stack_calculator_deploy
+      - stack_calculator_deploy:
+          requires:
+            - stack_calculator_test
   matching:
     jobs:
       - matching_test
-      - matching_deploy
+      - matching_deploy:
+          requires:
+            - matching_test
