@@ -1,0 +1,27 @@
+apply plugin: 'java'
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.+'
+}
+
+test {
+    afterTest { desc, result ->
+        logger.quiet "Executing test ${desc.className}.${desc.name} with result: ${result.resultType}"
+    }
+}
+
+apply plugin: 'application'
+mainClassName = 'Subway'
+
+run {
+    if (project.hasProperty("appArgs")) {
+        args Eval.me(appArgs)
+    }
+    standardInput = System.in
+}
