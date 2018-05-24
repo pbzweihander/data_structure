@@ -135,27 +135,71 @@ jobs:
 
 workflows:
   version: 2
+
   big_integer:
     jobs:
-      - big_integer_test
+      - big_integer_test:
+          filters:
+            branches:
+              only:
+                - master
+                - big-integer
       - big_integer_deploy:
           requires:
             - big_integer_test
+          filters:
+            branches:
+              only:
+                - master
+                - big-integer
+
   movie_database:
     jobs:
-      - movie_database_test
+      - movie_database_test:
+          filters:
+            branches:
+              only:
+                - master
+                - movie-database
       - movie_database_deploy:
           requires:
             - movie_database_test
+          filters:
+            branches:
+              only:
+                - master
+                - movie-database
+
   stack_calculator:
     jobs:
-      - stack_calculator_test
+      - stack_calculator_test:
+          filters:
+            branches:
+              only:
+                - master
+                - stack-calculator
       - stack_calculator_deploy:
           requires:
             - stack_calculator_test
+          filters:
+            branches:
+              only:
+                - master
+                - stack-calculator
+
   matching:
     jobs:
-      - matching_test
+      - matching_test:
+          filters:
+            branches:
+              only:
+                - master
+                - matching
       - matching_deploy:
           requires:
             - matching_test
+          filters:
+            branches:
+              only:
+                - master
+                - matching
