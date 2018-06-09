@@ -3,5 +3,5 @@ public interface Weight extends Comparable<Weight> {
 
     public boolean isInfinity();
 
-    public void setInfinity(boolean inf);
+    public void setZero();
 }

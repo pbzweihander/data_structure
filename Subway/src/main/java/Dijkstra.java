@@ -82,7 +82,7 @@ public class Dijkstra<V extends Vertex<E, W>, E extends Edge<? extends Vertex<?,
         int endIndex = vertexToIndexMap.get(end);
         W startWeight = weightList.get(startIndex);
 
-        startWeight.setInfinity(false);
+        startWeight.setZero();
         unvisited.add(new Pair<>(startIndex, startWeight));
 
         W weightSum = doDijkstraAndReturnWeightSum(backtracker, endIndex);
@@ -110,7 +110,7 @@ public class Dijkstra<V extends Vertex<E, W>, E extends Edge<? extends Vertex<?,
         for (V vertex : starts) {
             int index = vertexToIndexMap.get(vertex);
             W weight = weightList.get(index);
-            weight.setInfinity(false);
+            weight.setZero();
             unvisited.add(new Pair<>(index, weight));
         }
 

@@ -18,19 +18,8 @@ public class StationWeight implements Weight {
     public int compareTo(Weight other) {
         if (other instanceof StationWeight)
             return compareTo((StationWeight) other);
-        else {
-            if (isInfinity) {
-                if (other.isInfinity())
-                    return 0;
-                else
-                    return 1;
-            } else {
-                if (other.isInfinity())
-                    return -1;
-                else
-                    return 0;
-            }
-        }
+        else
+            throw new ClassCastException();
     }
 
     public int compareTo(StationWeight other) {
@@ -53,14 +42,16 @@ public class StationWeight implements Weight {
             weight += otherAsSelf.weight;
             isInfinity = false;
         } else
-            throw new NullPointerException();
+            throw new ClassCastException();
     }
 
     public boolean isInfinity() {
         return isInfinity;
     }
 
-    public void setInfinity(boolean inf) {
-        isInfinity = inf;
+    public void setZero() {
+        transferCount = 0;
+        weight = 0;
+        isInfinity = false;
     }
 }
