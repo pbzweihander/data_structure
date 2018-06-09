@@ -9,6 +9,7 @@ public class Station extends LinkedList<StationEdge> implements Vertex<StationEd
     private Integer hashCode;
 
     public Station(String code, String name, String line) {
+        super();
         this.code = code;
         this.name = name;
         this.line = line;
