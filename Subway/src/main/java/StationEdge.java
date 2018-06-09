@@ -14,8 +14,4 @@ public class StationEdge implements Edge<Station, StationWeight> {
     public StationWeight getWeight() {
         return weight;
     }
-
-    public int compareTo(Edge<Station, StationWeight> other) {
-        return weight.compareTo(other.getWeight());
-    }
 }
