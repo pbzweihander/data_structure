@@ -77,10 +77,13 @@ public class SubwayTest {
         PrintStream alternativeStdOut = new PrintStream(actualOutStream);
 
         System.setOut(alternativeStdOut);
-        String input;
-        while ((input = inReader.readLine()) != null)
-            Subway.processLine(subway, input);
-        System.setOut(originalStdOut);
+        try {
+            String input;
+            while ((input = inReader.readLine()) != null)
+                Subway.processLine(subway, input);
+        } finally {
+            System.setOut(originalStdOut);
+        }
 
         inReader.close();
         alternativeStdOut.close();
