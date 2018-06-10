@@ -14,15 +14,4 @@ public class Pair<T, U> {
     public U second() {
         return second;
     }
-
-    @Override
-    public boolean equals(Object other) {
-        if (this == other)
-            return true;
-        else if (other instanceof Pair<?, ?>) {
-            Pair<?, ?> otherPair = (Pair<?, ?>) other;
-            return first.equals(otherPair.first) && second.equals(otherPair.second);
-        } else
-            return false;
-    }
 }
