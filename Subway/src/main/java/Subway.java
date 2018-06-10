@@ -77,25 +77,14 @@ public class Subway {
         List<Station> starts = nameToStationsMap.get(startName);
         List<Station> ends = nameToStationsMap.get(endName);
 
-        dijkstra.setComparator(null);
-        Pair<List<Station>, StationWeight> pair = dijkstra.findShortestPath(starts, ends);
-
-        return new Route(pair.first(), pair.second());
+        return new Route(dijkstra.findShortestPath(starts, ends));
     }
 
     public Route getMinimumTransiRoute(String startName, String endName) {
         List<Station> starts = nameToStationsMap.get(startName);
         List<Station> ends = nameToStationsMap.get(endName);
 
-        dijkstra.setComparator((a, b) -> {
-            if (!a.isInfinity() && !b.isInfinity() && a.getTransferCount() != b.getTransferCount())
-                return a.getTransferCount() > b.getTransferCount() ? 1 : -1;
-            else
-                return a.compareTo(b);
-        });
-        Pair<List<Station>, StationWeight> pair = dijkstra.findShortestPath(starts, ends);
-
-        return new Route(pair.first(), pair.second());
+        return new Route(dijkstra.findShortestPath(starts, ends, (a, b) -> a.compareWithTransfer(b)));
     }
 
     public static void main(String[] args) throws FileNotFoundException, IOException {

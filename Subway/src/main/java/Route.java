@@ -9,6 +9,10 @@ public class Route {
         this.weight = weight;
     }
 
+    public Route(Pair<List<Station>, StationWeight> pair) {
+        this(pair.first(), pair.second());
+    }
+
     public long getTime() {
         return weight.getTime();
     }

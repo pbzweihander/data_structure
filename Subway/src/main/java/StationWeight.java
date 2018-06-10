@@ -9,9 +9,9 @@ public class StationWeight implements Weight {
         isInfinity = true;
     }
 
-    public StationWeight(int transferCount, int weight) {
+    public StationWeight(int transferCount, int time) {
         this.transferCount = transferCount;
-        this.time = weight;
+        this.time = time;
         isInfinity = false;
     }
 
@@ -47,6 +47,19 @@ public class StationWeight implements Weight {
             return time > other.time ? 1 : -1;
         else
             return transferCount > other.transferCount ? 1 : transferCount == other.transferCount ? 0 : -1;
+    }
+
+    public int compareWithTransfer(StationWeight other) {
+        if (isInfinity && other.isInfinity)
+            return 0;
+        else if (isInfinity)
+            return 1;
+        else if (other.isInfinity)
+            return -1;
+        else if (transferCount != other.transferCount)
+            return transferCount > other.transferCount ? 1 : -1;
+        else
+            return time > other.time ? 1 : time == other.time ? 0 : -1;
     }
 
     public void add(Weight other) {

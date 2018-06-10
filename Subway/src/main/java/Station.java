@@ -28,8 +28,8 @@ public class Station extends LinkedList<StationEdge> implements Vertex<StationEd
         return line;
     }
 
-    public void addEdge(Station to, int transferCount, int weight) {
-        add(new StationEdge(to, transferCount, weight));
+    public void addEdge(Station to, int transferCount, int time) {
+        add(new StationEdge(to, transferCount, time));
     }
 
     @Override

@@ -27,7 +27,7 @@ public class SubwayTest {
         private final FileReader testOut;
 
         public TestCase(String testCaseName, String dataName) {
-            testName = testCaseName;
+            testName = testCaseName + "@" + dataName;
             try {
                 testIn = new FileReader(new File("tc/" + testCaseName + ".in"));
                 testOut = new FileReader(new File("tc/" + testCaseName + ".out"));
@@ -103,14 +103,6 @@ public class SubwayTest {
         actualOutReader.close();
     }
 
-    @Test
-    public void testWithTestCases() throws FileNotFoundException, IOException {
-        List<TestCase> tcs = getTestList();
-
-        for (TestCase tc : tcs)
-            testWithTestCase(tc);
-    }
-
     public List<TestCase> getTestList() throws FileNotFoundException, IOException {
         File listFile = new File("test.list");
 
@@ -120,5 +112,13 @@ public class SubwayTest {
                 .filter(arr -> arr.length == 2).map(arr -> new TestCase(arr[0], arr[1])).collect(Collectors.toList());
         reader.close();
         return list;
+    }
+
+    @Test
+    public void testWithTestCases() throws FileNotFoundException, IOException {
+        List<TestCase> tcs = getTestList();
+
+        for (TestCase tc : tcs)
+            testWithTestCase(tc);
     }
 }

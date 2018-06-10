@@ -15,9 +15,6 @@ public class Dijkstra<V extends Vertex<E, W>, E extends Edge<? extends Vertex<?,
 
     private final Class<W> classOfW;
 
-    private Comparator<W> comparator;
-    private Queue<Pair<Integer, W>> unvisited;
-
     private W getInstanceOfW() {
         try {
             return classOfW.newInstance();
@@ -38,35 +35,13 @@ public class Dijkstra<V extends Vertex<E, W>, E extends Edge<? extends Vertex<?,
             vertexToIndexMap.put(vertex, i);
             i++;
         }
-        unvisited = new PriorityQueue<>(graph.size(), (a, b) -> a.second().compareTo(b.second()));
-        comparator = null;
     }
 
-    public Dijkstra(List<V> list, Class<W> classOfW, Comparator<W> comparator) {
-        this(list, classOfW);
-        this.comparator = comparator;
-        unvisited = new PriorityQueue<>(graph.size(), (a, b) -> comparator.compare(a.second(), b.second()));
-    }
-
-    public void setComparator(Comparator<W> comparator) {
-        this.comparator = comparator;
-        if (comparator != null)
-            unvisited = new PriorityQueue<>(graph.size(), (a, b) -> comparator.compare(a.second(), b.second()));
-        else
-            unvisited = new PriorityQueue<>(graph.size(), (a, b) -> a.second().compareTo(b.second()));
-    }
-
-    public Pair<List<V>, W> findShortestPath(V start, V end) {
-        List<V> starts = new ArrayList<>();
-        List<V> ends = new ArrayList<>();
-        starts.add(start);
-        ends.add(end);
-        return findShortestPath(starts, ends);
-    }
-
-    public Pair<List<V>, W> findShortestPath(List<V> starts, List<V> ends) {
+    public Pair<List<V>, W> findShortestPath(List<V> starts, List<V> ends, Comparator<W> comparator) {
         weightList.clear();
-        unvisited.clear();
+        Queue<Pair<Integer, W>> unvisited = new PriorityQueue<>(graph.size(),
+                (a, b) -> comparator.compare(a.second(), b.second()));
+
         for (int i = 0; i < graph.size(); i++)
             weightList.add(getInstanceOfW());
 
@@ -109,13 +84,7 @@ public class Dijkstra<V extends Vertex<E, W>, E extends Edge<? extends Vertex<?,
                 addedWeight.add(weightSum);
                 addedWeight.add(weight);
 
-                int compare;
-                if (comparator == null)
-                    compare = toWeight.compareTo(addedWeight);
-                else
-                    compare = comparator.compare(toWeight, addedWeight);
-
-                if (compare > 0) {
+                if (comparator.compare(toWeight, addedWeight) > 0) {
                     toWeight.setZero();
                     toWeight.add(addedWeight);
                     backtracker[to] = now;
@@ -143,5 +112,21 @@ public class Dijkstra<V extends Vertex<E, W>, E extends Edge<? extends Vertex<?,
         route.add(0, graph.get(now));
 
         return new Pair<>(route, weightSum);
+    }
+
+    public Pair<List<V>, W> findShortestPath(V start, V end, Comparator<W> comparator) {
+        List<V> starts = new ArrayList<>();
+        List<V> ends = new ArrayList<>();
+        starts.add(start);
+        ends.add(end);
+        return findShortestPath(starts, ends, comparator);
+    }
+
+    public Pair<List<V>, W> findShortestPath(List<V> starts, List<V> ends) {
+        return findShortestPath(starts, ends, (a, b) -> a.compareTo(b));
+    }
+
+    public Pair<List<V>, W> findShortestPath(V start, V end) {
+        return findShortestPath(start, end, (a, b) -> a.compareTo(b));
     }
 }
