@@ -43,16 +43,28 @@ public class Dijkstra<V extends Vertex<E, W>, E extends Edge<? extends Vertex<?,
         Pair<Integer, W> startPair = unvisited.poll();
         int now = startPair.first();
         W weightSum = startPair.second();
+
         while (until != now) {
             V nowVertex = graph.get(now);
+
             for (E edge : nowVertex) {
-                W weight = edge.getWeight();
                 Object toVertex = edge.getTo();
                 int to = vertexToIndexMap.get(toVertex);
 
+                if (visited[to])
+                    continue;
+
+                W weight = edge.getWeight();
+
                 W toWeight = weightList.get(to);
-                toWeight.add(weightSum);
-                toWeight.add(weight);
+                Weight addedWeight = weightSum.clone();
+                addedWeight.add(weight);
+
+                if (toWeight.compareTo(addedWeight) > 0) {
+                    toWeight.setZero();
+                    toWeight.add(addedWeight);
+                    backtracker[to] = now;
+                }
 
                 unvisited.add(new Pair<>(to, toWeight));
             }
@@ -64,7 +76,6 @@ public class Dijkstra<V extends Vertex<E, W>, E extends Edge<? extends Vertex<?,
                 nextIndex = pair.first();
                 weightSum = pair.second();
             }
-            backtracker[nextIndex] = now;
             now = nextIndex;
         }
 
@@ -74,7 +85,8 @@ public class Dijkstra<V extends Vertex<E, W>, E extends Edge<? extends Vertex<?,
     public Pair<List<V>, W> findShortestPath(V start, V end) {
         weightList.clear();
         unvisited.clear();
-        weightList.addAll(Collections.nCopies(graph.size(), getInstanceOfW()));
+        for (int i = 0; i < graph.size(); i++)
+            weightList.add(getInstanceOfW());
 
         int[] backtracker = new int[graph.size()];
 
@@ -94,6 +106,7 @@ public class Dijkstra<V extends Vertex<E, W>, E extends Edge<? extends Vertex<?,
             route.add(0, graph.get(nowIndex));
             nowIndex = backtracker[nowIndex];
         }
+        route.add(0, graph.get(nowIndex));
 
         return new Pair<>(route, weightSum);
     }
@@ -123,6 +136,7 @@ public class Dijkstra<V extends Vertex<E, W>, E extends Edge<? extends Vertex<?,
             route.add(0, graph.get(nowIndex));
             nowIndex = backtracker[nowIndex];
         }
+        route.add(0, graph.get(nowIndex));
 
         return new Pair<>(route, weightSum);
     }

@@ -15,6 +15,12 @@ public class StationWeight implements Weight {
         isInfinity = false;
     }
 
+    public StationWeight(StationWeight other) {
+        transferCount = other.transferCount;
+        weight = other.weight;
+        isInfinity = other.isInfinity;
+    }
+
     public int compareTo(Weight other) {
         if (other instanceof StationWeight)
             return compareTo((StationWeight) other);
@@ -53,5 +59,9 @@ public class StationWeight implements Weight {
         transferCount = 0;
         weight = 0;
         isInfinity = false;
+    }
+
+    public Weight clone() {
+        return new StationWeight(this);
     }
 }

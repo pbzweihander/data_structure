@@ -21,6 +21,11 @@ public class DijkstraTest {
             isInfinity = false;
         }
 
+        public SimpleWeight(SimpleWeight other) {
+            weight = other.weight;
+            isInfinity = other.isInfinity;
+        }
+
         public void add(Weight other) {
             if (other instanceof SimpleWeight) {
                 weight += ((SimpleWeight) other).weight;
@@ -43,7 +48,14 @@ public class DijkstraTest {
         }
 
         public int compareTo(SimpleWeight other) {
-            return weight - other.weight;
+            if (isInfinity && other.isInfinity)
+                return 0;
+            else if (isInfinity)
+                return 1;
+            else if (other.isInfinity)
+                return -1;
+            else
+                return weight - other.weight;
         }
 
         public int compareTo(Weight other) {
@@ -51,6 +63,16 @@ public class DijkstraTest {
                 return compareTo((SimpleWeight) other);
             else
                 throw new ClassCastException();
+        }
+
+        @Override
+        public String toString() {
+            return isInfinity ? "Inf" : ("" + weight);
+        }
+
+        @Override
+        public Weight clone() {
+            return new SimpleWeight(this);
         }
     }
 
@@ -69,6 +91,11 @@ public class DijkstraTest {
 
         public SimpleWeight getWeight() {
             return weight;
+        }
+
+        @Override
+        public String toString() {
+            return "-> " + to.toString() + " (" + weight.toString() + ")";
         }
     }
 
