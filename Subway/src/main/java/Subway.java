@@ -16,12 +16,15 @@ public class Subway {
     private static final Pattern stationPattern = Pattern.compile("^(\\S+?) (\\S+?) (\\S+?)$");
     private static final Pattern edgePattern = Pattern.compile("^(\\S+?) (\\S+?) (\\d+?)$");
 
-    private HashMap<String, List<Station>> nameToStationsMap;
-    private HashMap<String, Station> codeToStationMap;
+    private final HashMap<String, List<Station>> nameToStationsMap;
+    private final HashMap<String, Station> codeToStationMap;
+    private final List<Station> stations;
+    private final Dijkstra<Station, StationEdge, StationWeight> dijkstra;
 
     public Subway(Reader reader) throws IOException {
         nameToStationsMap = new HashMap<>();
         codeToStationMap = new HashMap<>();
+        stations = new ArrayList<>();
 
         BufferedReader bufferedReader = new BufferedReader(reader);
 
@@ -39,16 +42,17 @@ public class Subway {
             Station station = new Station(code, name, line);
             codeToStationMap.put(code, station);
             if (nameToStationsMap.containsKey(name)) {
-                List<Station> stations = nameToStationsMap.get(name);
-                for (Station s : stations) {
+                List<Station> list = nameToStationsMap.get(name);
+                for (Station s : list) {
                     s.addEdge(station, 1, 0);
                     station.addEdge(s, 1, 0);
                 }
             } else {
-                List<Station> stations = new ArrayList<>();
-                stations.add(station);
-                nameToStationsMap.put(name, stations);
+                List<Station> list = new ArrayList<>();
+                list.add(station);
+                nameToStationsMap.put(name, list);
             }
+            stations.add(station);
         }
 
         while ((inputLine = bufferedReader.readLine()) != null) {
@@ -65,14 +69,44 @@ public class Subway {
             Station toStation = codeToStationMap.get(to);
             fromStation.addEdge(toStation, 0, weight);
         }
+        dijkstra = new Dijkstra<>(stations, StationWeight.class);
     }
 
-    public Route getShortestRoute(String start, String end) {
-        return null;
+    public Route getShortestRoute(String startName, String endName) {
+        List<Station> starts = nameToStationsMap.get(startName);
+        List<Station> ends = nameToStationsMap.get(endName);
+
+        Pair<List<Station>, StationWeight> pair;
+        dijkstra.setComparator(null);
+        if (starts.size() > 1)
+            pair = dijkstra.findShortedPathWithMultipleStart(starts, ends.get(0));
+        else
+            pair = dijkstra.findShortestPath(starts.get(0), ends.get(0));
+        return new Route(pair.first(), pair.second());
     }
 
-    public Route getMinimumTransiRoute(String start, String end) {
-        return null;
+    public Route getMinimumTransiRoute(String startName, String endName) {
+        List<Station> starts = nameToStationsMap.get(startName);
+        List<Station> ends = nameToStationsMap.get(endName);
+
+        Pair<List<Station>, StationWeight> pair;
+        dijkstra.setComparator((a, b) -> {
+            if (a.isInfinity() && b.isInfinity())
+                return 0;
+            else if (a.isInfinity())
+                return 1;
+            else if (b.isInfinity())
+                return -1;
+            else if (a.getTransferCount() == b.getTransferCount())
+                return (int) (a.getTime() - b.getTime());
+            else
+                return (int) (a.getTransferCount() - b.getTransferCount());
+        });
+        if (starts.size() > 1)
+            pair = dijkstra.findShortedPathWithMultipleStart(starts, ends.get(0));
+        else
+            pair = dijkstra.findShortestPath(starts.get(0), ends.get(0));
+        return new Route(pair.first(), pair.second());
     }
 
     public static void main(String[] args) throws FileNotFoundException, IOException {
@@ -94,13 +128,14 @@ public class Subway {
             String station2 = matcher.group(2);
             String group3 = matcher.group(3);
 
-            List<Station> route;
+            Route route;
             if (group3 != null && !group3.isEmpty())
                 route = subway.getMinimumTransiRoute(station1, station2);
             else
                 route = subway.getShortestRoute(station1, station2);
 
             System.out.println(route.toString());
+            System.out.println(route.getTime());
         }
     }
 }

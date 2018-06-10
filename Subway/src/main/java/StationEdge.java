@@ -14,4 +14,9 @@ public class StationEdge implements Edge<Station, StationWeight> {
     public StationWeight getWeight() {
         return weight;
     }
+
+    @Override
+    public String toString() {
+        return "-> " + to.getName() + " (" + weight.toString() + ")";
+    }
 }

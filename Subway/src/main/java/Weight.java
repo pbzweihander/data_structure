@@ -4,6 +4,4 @@ public interface Weight extends Comparable<Weight> {
     public boolean isInfinity();
 
     public void setZero();
-
-    public Weight clone();
 }

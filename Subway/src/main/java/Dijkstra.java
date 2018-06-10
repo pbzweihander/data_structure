@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -9,10 +10,12 @@ import java.util.Queue;
 public class Dijkstra<V extends Vertex<E, W>, E extends Edge<? extends Vertex<?, W>, W>, W extends Weight> {
     private final List<V> graph;
     private final List<W> weightList;
-    private final Queue<Pair<Integer, W>> unvisited;
     private final HashMap<V, Integer> vertexToIndexMap;
 
     private final Class<W> classOfW;
+
+    private Comparator<W> comparator;
+    private Queue<Pair<Integer, W>> unvisited;
 
     private W getInstanceOfW() {
         try {
@@ -35,6 +38,21 @@ public class Dijkstra<V extends Vertex<E, W>, E extends Edge<? extends Vertex<?,
             i++;
         }
         unvisited = new PriorityQueue<>(graph.size(), (a, b) -> a.second().compareTo(b.second()));
+        comparator = null;
+    }
+
+    public Dijkstra(List<V> list, Class<W> classOfW, Comparator<W> comparator) {
+        this(list, classOfW);
+        this.comparator = comparator;
+        unvisited = new PriorityQueue<>(graph.size(), (a, b) -> comparator.compare(a.second(), b.second()));
+    }
+
+    public void setComparator(Comparator<W> comparator) {
+        this.comparator = comparator;
+        if (comparator != null)
+            unvisited = new PriorityQueue<>(graph.size(), (a, b) -> comparator.compare(a.second(), b.second()));
+        else
+            unvisited = new PriorityQueue<>(graph.size(), (a, b) -> a.second().compareTo(b.second()));
     }
 
     private W doDijkstraAndReturnWeightSum(int[] backtracker, int until) {
@@ -57,10 +75,17 @@ public class Dijkstra<V extends Vertex<E, W>, E extends Edge<? extends Vertex<?,
                 W weight = edge.getWeight();
 
                 W toWeight = weightList.get(to);
-                Weight addedWeight = weightSum.clone();
+                W addedWeight = getInstanceOfW();
+                addedWeight.add(weightSum);
                 addedWeight.add(weight);
 
-                if (toWeight.compareTo(addedWeight) > 0) {
+                int compare;
+                if (comparator == null)
+                    compare = toWeight.compareTo(addedWeight);
+                else
+                    compare = comparator.compare(toWeight, addedWeight);
+
+                if (compare > 0) {
                     toWeight.setZero();
                     toWeight.add(addedWeight);
                     backtracker[to] = now;

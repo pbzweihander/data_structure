@@ -69,11 +69,6 @@ public class DijkstraTest {
         public String toString() {
             return isInfinity ? "Inf" : ("" + weight);
         }
-
-        @Override
-        public Weight clone() {
-            return new SimpleWeight(this);
-        }
     }
 
     public static class SimpleEdge implements Edge<SimpleVertex, SimpleWeight> {

@@ -1,11 +1,24 @@
 import java.util.List;
 
-public interface Route extends List<Station> {
-    public static String toStringOf(Route r) {
+public class Route {
+    private final List<Station> stations;
+    private final StationWeight weight;
+
+    public Route(List<Station> stations, StationWeight weight) {
+        this.stations = stations;
+        this.weight = weight;
+    }
+
+    public long getTime() {
+        return weight.getTransferCount() * 5 + weight.getTime();
+    }
+
+    @Override
+    public String toString() {
         StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < r.size(); i++) {
-            Station s = r.get(i);
-            if (i + 1 < r.size() && r.get(i + 1).getName().equals(s.getName())) {
+        for (int i = 0; i < stations.size(); i++) {
+            Station s = stations.get(i);
+            if (i + 1 < stations.size() && stations.get(i + 1).getName().equals(s.getName())) {
                 builder.append("[" + s.getName() + "] ");
                 i++;
             } else

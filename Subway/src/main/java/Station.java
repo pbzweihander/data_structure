@@ -38,4 +38,9 @@ public class Station extends LinkedList<StationEdge> implements Vertex<StationEd
             hashCode = super.hashCode();
         return hashCode;
     }
+
+    @Override
+    public String toString() {
+        return code + " " + name + " " + super.toString();
+    }
 }
