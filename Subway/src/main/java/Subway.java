@@ -44,9 +44,10 @@ public class Subway {
             if (nameToStationsMap.containsKey(name)) {
                 List<Station> list = nameToStationsMap.get(name);
                 for (Station s : list) {
-                    s.addEdge(station, 1, 0);
-                    station.addEdge(s, 1, 0);
+                    s.addEdge(station, 1, 5);
+                    station.addEdge(s, 1, 5);
                 }
+                list.add(station);
             } else {
                 List<Station> list = new ArrayList<>();
                 list.add(station);
@@ -76,12 +77,9 @@ public class Subway {
         List<Station> starts = nameToStationsMap.get(startName);
         List<Station> ends = nameToStationsMap.get(endName);
 
-        Pair<List<Station>, StationWeight> pair;
         dijkstra.setComparator(null);
-        if (starts.size() > 1)
-            pair = dijkstra.findShortedPathWithMultipleStart(starts, ends.get(0));
-        else
-            pair = dijkstra.findShortestPath(starts.get(0), ends.get(0));
+        Pair<List<Station>, StationWeight> pair = dijkstra.findShortestPath(starts, ends);
+
         return new Route(pair.first(), pair.second());
     }
 
@@ -89,23 +87,14 @@ public class Subway {
         List<Station> starts = nameToStationsMap.get(startName);
         List<Station> ends = nameToStationsMap.get(endName);
 
-        Pair<List<Station>, StationWeight> pair;
         dijkstra.setComparator((a, b) -> {
-            if (a.isInfinity() && b.isInfinity())
-                return 0;
-            else if (a.isInfinity())
-                return 1;
-            else if (b.isInfinity())
-                return -1;
-            else if (a.getTransferCount() == b.getTransferCount())
-                return (int) (a.getTime() - b.getTime());
+            if (!a.isInfinity() && !b.isInfinity() && a.getTransferCount() != b.getTransferCount())
+                return a.getTransferCount() > b.getTransferCount() ? 1 : -1;
             else
-                return (int) (a.getTransferCount() - b.getTransferCount());
+                return a.compareTo(b);
         });
-        if (starts.size() > 1)
-            pair = dijkstra.findShortedPathWithMultipleStart(starts, ends.get(0));
-        else
-            pair = dijkstra.findShortestPath(starts.get(0), ends.get(0));
+        Pair<List<Station>, StationWeight> pair = dijkstra.findShortestPath(starts, ends);
+
         return new Route(pair.first(), pair.second());
     }
 

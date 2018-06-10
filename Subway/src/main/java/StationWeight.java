@@ -37,16 +37,16 @@ public class StationWeight implements Weight {
     }
 
     public int compareTo(StationWeight other) {
-        if (isInfinity() && other.isInfinity())
+        if (isInfinity && other.isInfinity)
             return 0;
-        else if (isInfinity())
+        else if (isInfinity)
             return 1;
-        else if (other.isInfinity())
+        else if (other.isInfinity)
             return -1;
-        else if (getTime() == other.getTime())
-            return (int) (getTransferCount() - other.getTransferCount());
+        else if (time != other.time)
+            return time > other.time ? 1 : -1;
         else
-            return (int) (getTime() - other.getTime());
+            return transferCount > other.transferCount ? 1 : transferCount == other.transferCount ? 0 : -1;
     }
 
     public void add(Weight other) {
@@ -54,7 +54,7 @@ public class StationWeight implements Weight {
             StationWeight otherAsSelf = (StationWeight) other;
             transferCount += otherAsSelf.transferCount;
             time += otherAsSelf.time;
-            isInfinity = false;
+            isInfinity = isInfinity || otherAsSelf.isInfinity;
         } else
             throw new ClassCastException();
     }

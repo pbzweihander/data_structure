@@ -10,7 +10,7 @@ public class Route {
     }
 
     public long getTime() {
-        return weight.getTransferCount() * 5 + weight.getTime();
+        return weight.getTime();
     }
 
     @Override
