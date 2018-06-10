@@ -29,33 +29,37 @@ public class Subway {
         while ((inputLine = bufferedReader.readLine()) != null && !inputLine.isEmpty()) {
             Matcher matcher = stationPattern.matcher(inputLine);
 
+            if (!matcher.matches())
+                continue;
+
             String code = matcher.group(1);
             String name = matcher.group(2);
             String line = matcher.group(3);
 
+            Station station = new Station(code, name, line);
+            codeToStationMap.put(code, station);
             if (nameToStationsMap.containsKey(name)) {
-                Station station = new Station(code, name, line);
-                codeToStationMap.put(code, station);
                 List<Station> stations = nameToStationsMap.get(name);
                 for (Station s : stations) {
                     s.addEdge(station, 1, 0);
                     station.addEdge(s, 1, 0);
                 }
             } else {
-                Station station = new Station(code, name, line);
                 List<Station> stations = new ArrayList<>();
                 stations.add(station);
                 nameToStationsMap.put(name, stations);
-                codeToStationMap.put(code, station);
             }
         }
 
         while ((inputLine = bufferedReader.readLine()) != null) {
             Matcher matcher = edgePattern.matcher(inputLine);
 
+            if (!matcher.matches())
+                continue;
+
             String from = matcher.group(1);
             String to = matcher.group(2);
-            Integer weight = Integer.getInteger(matcher.group(3));
+            Integer weight = Integer.parseInt(matcher.group(3));
 
             Station fromStation = codeToStationMap.get(from);
             Station toStation = codeToStationMap.get(to);
