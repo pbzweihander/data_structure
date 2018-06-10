@@ -99,7 +99,7 @@ public class Subway {
     }
 
     public static void main(String[] args) throws FileNotFoundException, IOException {
-        File file = new File(args[1]);
+        File file = new File(args[0]);
         Subway subway = new Subway(new FileReader(file));
 
         BufferedReader stdInReader = new BufferedReader(new InputStreamReader(System.in));
