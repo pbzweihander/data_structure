@@ -133,6 +133,39 @@ jobs:
           path: ~/project/Matching/src/main/java/src.zip
           destination: Matching.zip
 
+  subway_test:
+    docker:
+      - image: circleci/openjdk:8-jdk
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+          - gradle-{{ checksum "~/project/Subway/build.gradle" }}
+          - gradle-
+      - run:
+          name: Subway Test
+          working_directory: ~/project/Subway
+          command: gradle test
+      - store_artifacts:
+          path: ~/project/Subway/build/reports/tests/test
+          destination: test
+      - save_cache:
+          key: gradle-{{ checksum "~/project/Subway/build.gradle" }}
+          paths:
+            - ~/project/.gradle
+  subway_deploy:
+    docker:
+      - image: circleci/openjdk:8-jdk
+    steps:
+      - checkout
+      - run:
+          name: Subway Deploy
+          working_directory: ~/project/Subway/src/main/java
+          command: zip src.zip *.java
+      - store_artifacts:
+          path: ~/project/Subway/src/main/java/src.zip
+          destination: Subway.zip
+
 workflows:
   version: 2
 
@@ -203,3 +236,20 @@ workflows:
               only:
                 - master
                 - matching
+
+  subway:
+    jobs:
+      - subway_test:
+          filters:
+            branches:
+              only:
+                - master
+                - subway
+      - subway_deploy:
+          requires:
+            - subway_test
+          filters:
+            branches:
+              only:
+                - master
+                - subway
